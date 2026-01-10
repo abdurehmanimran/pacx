@@ -1,0 +1,2 @@
+# pacx
+A pacman wrapper.
