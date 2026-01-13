@@ -1,2 +1,2 @@
 pacx: pacx.c
-	cc ./pacx.c -o ./pacx
+	cc ./pacx.c ./downloader.c ./urls.c -o ./pacx
