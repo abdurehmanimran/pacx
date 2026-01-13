@@ -1,7 +1,7 @@
 #include "colors.h"
+#include "downloader.h"
 #include "urls.h"
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -25,19 +25,14 @@ int main(int argc, char **argv) {
     for (int i = 1; i < (sizeof(args) / sizeof(Argument)); i++) {
       if (strcmp(args[i].arg, argv[1]) == 0) {
         args[i].operation(i);
-        break;
+        return 0;
       }
     }
   }
   // Argument Management End
-  char *packages[] = {"neofetch", "vim", "fastfetch", "linux"};
-  URLs urls;
-  urls = getURLs(4, packages);
-
-  for (int i = 0; i < (sizeof(packages) / sizeof(char *)); i++) {
-    printf(GREEN "URL (%d): " WHITE "%s\n", i + 1, urls[i]);
-  }
-
+  packageInfo package;
+  initPackageInfo(&package, argv[1]);
+  downloadPackage(&package);
   return 0;
 }
 

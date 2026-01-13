@@ -134,6 +134,7 @@ void downloadPackage(packageInfo *packageInformation) {
   }
 }
 
+/*
 int main() {
   packageInfo package;
   initPackageInfo(&package, "neofetch");
@@ -141,3 +142,4 @@ int main() {
   free(package.totalSize);
   downloadPackage(&package);
 }
+*/
