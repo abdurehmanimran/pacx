@@ -31,11 +31,3 @@ URLs getURLs(int n, char **packages) {
   }
   return packageURLs;
 }
-
-int main() {
-  char *packages[] = {"neofetch", "linux", "git", "firefox", "pacman"};
-  URLs packageURLs = getURLs(5, packages);
-  for (int i = 0; i < 5; i++) {
-    printf("URL: %s\n", packageURLs[i]);
-  }
-}
