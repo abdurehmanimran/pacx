@@ -21,13 +21,3 @@ packageURL getPackageURL(char *package) {
   buffer[strcspn(buffer, "\n")] = '\0';
   return (packageURL)strdup(buffer);
 }
-
-URLs getURLs(int n, char **packages) {
-  URLs packageURLs;
-  packageURLs = (URLs)malloc(sizeof(packageURL) * n);
-
-  for (int i = 0; i < n; i++) {
-    packageURLs[i] = getPackageURL(packages[i]);
-  }
-  return packageURLs;
-}
