@@ -31,10 +31,9 @@ void insertPackage(packageInfoList *packageList, packageInfo *package) {
 
 void retrievePackages(int argPosition, int totalArgs, char **argv,
                       packageInfoList *packageList) {
-  // packageInfoList packages; Defined in the global scope
-  // argPosition++; // Move the position from "-S" to next one
+  argPosition++; // Move the position from "-S" to next one
 
-  initPackageList(packageList); // packageList is defined in global scope
+  initPackageList(packageList);
 
   while (argPosition < totalArgs) {
     if (argv[argPosition][0] != '-') {
@@ -44,6 +43,8 @@ void retrievePackages(int argPosition, int totalArgs, char **argv,
 
       // Adding the packageInfo to the package
       insertPackage(packageList, package);
+    } else {
+      break;
     }
     argPosition++;
   }

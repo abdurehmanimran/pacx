@@ -8,8 +8,11 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-Argument args[] = {
-    {"-h", printHelp}, {"--help", printHelp}, {"-S", syncPackages}};
+Argument args[] = {{"-h", printHelp},
+                   {"--help", printHelp},
+                   {"-S", syncPackages},
+                   {"-s", syncPackages},
+                   {"--sync", syncPackages}};
 
 int totalArgs;
 packageInfoList packageList;
@@ -22,9 +25,10 @@ int main(int argc, char **argv) {
     return 0;
   } else {
     // Iterating through the arguments
+    // To be Fixed !!! At this moment it only checks for the first argument
     for (int i = 1; i < (sizeof(args) / sizeof(Argument)); i++) {
       if (strcmp(args[i].arg, argv[1]) == 0) {
-        args[i].operation(i, argv);
+        args[i].operation(1, argv);
         return 0;
       }
     }
