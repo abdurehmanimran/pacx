@@ -6,15 +6,13 @@
 #include <string.h>
 #include <unistd.h>
 
-/*
- * Defination of packageInfo:
- *typedef struct {
- *  char *packageName;
- *  char *downloaded;
- *  char *totalSize;
- *  char *progress;
- * } packageInfo;
- */
+// Defination of packageInfo:
+// typedef struct {
+//   char *packageName;
+//   char *downloaded;
+//   char *totalSize;
+//   char *progress;
+// } packageInfo;
 
 void initPackageInfo(packageInfo *package, char *name) {
   package->packageName = name;
@@ -113,6 +111,7 @@ void downloadPackage(packageInfo *packageInformation) {
                     "./",
                     NULL};
     execvp(args[0], args);
+    free(url);
   } else if (processPID > 0) {
     // Parent Process
     // Reading the stdout of the child process
@@ -133,13 +132,3 @@ void downloadPackage(packageInfo *packageInformation) {
            packageInformation->packageName);
   }
 }
-
-/*
-int main() {
-  packageInfo package;
-  initPackageInfo(&package, "neofetch");
-  free(package.progress);
-  free(package.totalSize);
-  downloadPackage(&package);
-}
-*/

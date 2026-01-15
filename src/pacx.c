@@ -1,6 +1,5 @@
 #include "colors.h"
 #include "downloader.h"
-#include "urls.h"
 #include <stdio.h>
 #include <string.h>
 #include <sys/types.h>
@@ -33,6 +32,7 @@ int main(int argc, char **argv) {
   packageInfo package;
   initPackageInfo(&package, argv[1]);
   downloadPackage(&package);
+  freePackageInfo(&package);
   return 0;
 }
 
