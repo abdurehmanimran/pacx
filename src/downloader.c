@@ -1,19 +1,10 @@
 #include "downloader.h"
-#include "colors.h"
 #include "packageinfo.h"
 #include "urls.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <unistd.h>
-
-// Defination of packageInfo:
-// typedef struct {
-//   char *packageName;
-//   char *downloaded;
-//   char *totalSize;
-//   char *progress;
-// } packageInfo;
 
 void getDetails(char *summary, packageInfo **package) {
   // Sample Summary: [#243f8f 96KiB/142MiB(0%) CN:1 DL:506KiB ETA:4m48s]
@@ -87,10 +78,10 @@ void downloadPackage(packageInfo *packageInformation) {
       char info[strlen(buffer) + 1];
       strncpy(info, buffer, strlen(buffer) + 1);
       getDetails(info, &packageInformation);
-      printf("\r" GREEN "Speed: " WHITE "%s\t " GREEN "Downloaded: " WHITE "%s",
-             packageInformation->speed, packageInformation->downloaded);
-      fflush(stdout);
-      fflush(stderr);
+      // printf("\r" GREEN "Speed: " WHITE "%s\t " GREEN "Downloaded: " WHITE
+      // "%s",packageInformation->speed, packageInformation->downloaded);
+      // fflush(stdout);
+      // fflush(stderr);
     }
   } else {
     printf("Error while downloading the package: %s\n",

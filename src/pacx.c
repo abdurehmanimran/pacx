@@ -3,7 +3,9 @@
 #include "downloader.h"
 #include "packageinfo.h"
 #include "packagelist.h"
+#include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -43,12 +45,47 @@ void printHelp(int currentArg, char **argv) {
                "pacx {-h --help}\n");
 }
 
+void *startDownload(void *arg) { downloadPackage((packageInfo *)arg); }
+
+void printProgress() {
+  for (int i = 0; i < packageList.n; i++) {
+    if (packageList.packages[i]->downloaded != NULL &&
+        packageList.packages[i]->speed != NULL) {
+      printf(GREEN "%s\t\t\tSpeed: " WHITE "%s\t " GREEN "Downloaded: " WHITE
+                   "%s\n",
+             packageList.packages[i]->packageName,
+             packageList.packages[i]->speed,
+             packageList.packages[i]->downloaded);
+    } else {
+    }
+  }
+  fflush(stdout);
+  fflush(stderr);
+}
+
 void syncPackages(int currentArg, char **argv) {
   // Setup the list of packages
   retrievePackages(currentArg, totalArgs, argv, &packageList);
+  pthread_t *threads;
+  threads = (pthread_t *)malloc(sizeof(pthread_t) * packageList.n);
 
   for (int i = 0; i < packageList.n; i++) {
-    printf(GREEN "Package [%d]: " WHITE "%s\n", i + 1,
+    printf(GREEN "Launching a thread for Package [%d]: " WHITE "%s\n", i + 1,
            packageList.packages[i]->packageName);
+
+    // Starting the threads
+    pthread_create(&threads[i], NULL, startDownload, packageList.packages[i]);
+  }
+
+  while (1) {
+    printf("\r");
+    printProgress();
+    for (int i = 0; i < packageList.n; i++)
+      printf("\x1b[1A");
+    sleep(1);
+  }
+
+  for (int i = 0; i < packageList.n; i++) {
+    pthread_join(threads[i], NULL);
   }
 }

@@ -2,7 +2,7 @@ files := src/pacx.c src/packageinfo.c src/packagelist.c src/downloader.c src/url
 
 pacx: src/pacx.c src/downloader.c src/urls.c
 	mkdir -p bin
-	cc $(files) -o bin/pacx -fsanitize=address
+	cc $(files) -o bin/pacx -fsanitize=address -g -pthread
 
 build-release: src/pacx.c src/downloader.c src/urls.c
 	mkdir bin/release -p

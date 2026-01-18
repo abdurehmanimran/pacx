@@ -20,21 +20,28 @@ void freePackageInfo(packageInfo **package) {
 }
 
 void changePackageInfo(packageInfo *package, int opt, char *newValue) {
+  char *temp;
   switch (opt) {
   case 1:
-    free(package->downloaded);
+    temp = package->downloaded;
+    package->downloaded = NULL;
+    free(temp);
     package->downloaded = newValue;
     break;
   case 2:
     free(package->totalSize);
+    package->totalSize = NULL;
     package->totalSize = newValue;
     break;
   case 3:
-    free(package->speed);
+    temp = package->speed;
+    package->speed = NULL;
+    free(temp);
     package->speed = newValue;
     break;
   case 4:
     free(package->progress);
+    package->progress = NULL;
     package->progress = newValue;
     break;
   }
