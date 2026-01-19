@@ -45,25 +45,35 @@ void printHelp(int currentArg, char **argv) {
                "pacx {-h --help}\n");
 }
 
-void *startDownload(void *arg) { downloadPackage((packageInfo *)arg); }
+void *printProgress(void *arg) {
+  int *isRunning = ((int *)arg);
+  while (*isRunning) {
 
-void printProgress() {
-  for (int i = 0; i < packageList.n; i++) {
-    if (packageList.packages[i]->downloaded != NULL &&
-        packageList.packages[i]->speed != NULL) {
-      printf(GREEN "%s\t\t\tSpeed: " WHITE "%s\t " GREEN "Downloaded: " WHITE
-                   "%s\n",
-             packageList.packages[i]->packageName,
-             packageList.packages[i]->speed,
-             packageList.packages[i]->downloaded);
-    } else {
+    for (int i = 0; i < packageList.n; i++) {
+      if (packageList.packages[i]->downloaded != NULL &&
+          packageList.packages[i]->speed != NULL) {
+        printf("\r" GREEN "%s\tSpeed: " WHITE "%s\t " GREEN "Downloaded: " WHITE
+               "%s\n",
+               packageList.packages[i]->packageName,
+               packageList.packages[i]->speed,
+               packageList.packages[i]->downloaded);
+      } else {
+      }
+    }
+    fflush(stdout);
+    fflush(stderr);
+    if (*isRunning) {
+      for (int i = 0; i < packageList.n; i++)
+        printf("\x1b[1A");
+      sleep(1);
     }
   }
-  fflush(stdout);
-  fflush(stderr);
+  return NULL;
 }
 
 void syncPackages(int currentArg, char **argv) {
+  int *isRunning; // Dynamically Allocated for passing to other func
+  isRunning = (int *)malloc(sizeof(int));
   // Setup the list of packages
   retrievePackages(currentArg, totalArgs, argv, &packageList);
   pthread_t *threads;
@@ -76,16 +86,18 @@ void syncPackages(int currentArg, char **argv) {
     // Starting the threads
     pthread_create(&threads[i], NULL, startDownload, packageList.packages[i]);
   }
+  *isRunning = 1;
 
-  while (1) {
-    printf("\r");
-    printProgress();
-    for (int i = 0; i < packageList.n; i++)
-      printf("\x1b[1A");
-    sleep(1);
-  }
+  pthread_t printingThread;
+  pthread_create(&printingThread, NULL, printProgress, (void *)isRunning);
 
   for (int i = 0; i < packageList.n; i++) {
     pthread_join(threads[i], NULL);
   }
+  *isRunning = 0;
+  pthread_join(printingThread, NULL);
+
+  // freeing
+  free(isRunning);
+  free(threads);
 }
