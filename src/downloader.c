@@ -64,7 +64,7 @@ void downloadPackage(packageInfo *packageInformation) {
                     UPDATE_INTERVAL,
                     url,
                     "-d",
-                    "./",
+                    DOWNLOAD_DIRECTORY,
                     NULL};
     execvp(args[0], args);
     free(url);
@@ -87,4 +87,9 @@ void downloadPackage(packageInfo *packageInformation) {
     printf("Error while downloading the package: %s\n",
            packageInformation->packageName);
   }
+}
+
+void *startDownload(void *arg) {
+  downloadPackage((packageInfo *)arg);
+  return NULL;
 }
