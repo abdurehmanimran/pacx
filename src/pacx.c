@@ -10,6 +10,8 @@
 #include <sys/types.h>
 #include <unistd.h>
 
+#define MOVE_TO_PREV_LINE printf("\x1b[1A")
+
 Argument args[] = {{"-h", printHelp},
                    {"--help", printHelp},
                    {"-S", syncPackages},
@@ -20,6 +22,13 @@ int totalArgs;
 packageInfoList packageList;
 
 int main(int argc, char **argv) {
+  // Sudo Permission Check
+  if (getegid() != 0) {
+    puts(GREEN "Alert:" WHITE " You do not have " GREEN "sudo/root " WHITE
+               "permissions!!");
+    return 0;
+  }
+
   totalArgs = argc;
   // Argument Management Start
   if (argc == 1) {
@@ -45,26 +54,27 @@ void printHelp(int currentArg, char **argv) {
                "pacx {-h --help}\n");
 }
 
+void printDownloadInfo(packageInfo *package) {
+  printf(GREEN "%s\tSpeed: " WHITE "%s\t " GREEN "Downloaded: " WHITE "%s\n",
+         package->packageName, package->speed, package->downloaded);
+}
+
 void *printProgress(void *arg) {
   int *isRunning = ((int *)arg);
   while (*isRunning) {
 
     for (int i = 0; i < packageList.n; i++) {
       if (packageList.packages[i]->downloaded != NULL &&
-          packageList.packages[i]->speed != NULL) {
-        printf("\r" GREEN "%s\tSpeed: " WHITE "%s\t " GREEN "Downloaded: " WHITE
-               "%s\n",
-               packageList.packages[i]->packageName,
-               packageList.packages[i]->speed,
-               packageList.packages[i]->downloaded);
-      } else {
+          packageList.packages[i]->speed != NULL)
+        printDownloadInfo(packageList.packages[i]);
+      else {
       }
     }
     fflush(stdout);
     fflush(stderr);
     if (*isRunning) {
       for (int i = 0; i < packageList.n; i++)
-        printf("\x1b[1A");
+        MOVE_TO_PREV_LINE;
       sleep(1);
     }
   }
@@ -77,23 +87,13 @@ void syncPackages(int currentArg, char **argv) {
   // Setup the list of packages
   retrievePackages(currentArg, totalArgs, argv, &packageList);
   pthread_t *threads;
-  threads = (pthread_t *)malloc(sizeof(pthread_t) * packageList.n);
+  createDownloadThreads(&threads, &packageList);
 
-  for (int i = 0; i < packageList.n; i++) {
-    printf(GREEN "Launching a thread for Package [%d]: " WHITE "%s\n", i + 1,
-           packageList.packages[i]->packageName);
-
-    // Starting the threads
-    pthread_create(&threads[i], NULL, startDownload, packageList.packages[i]);
-  }
   *isRunning = 1;
-
   pthread_t printingThread;
   pthread_create(&printingThread, NULL, printProgress, (void *)isRunning);
 
-  for (int i = 0; i < packageList.n; i++) {
-    pthread_join(threads[i], NULL);
-  }
+  waitForDownloadThreads(&threads, &packageList);
   *isRunning = 0;
   pthread_join(printingThread, NULL);
 

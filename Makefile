@@ -1,9 +1,9 @@
-files := src/pacx.c src/packageinfo.c src/packagelist.c src/downloader.c src/urls.c
+codeFiles := src/pacx.c src/packageinfo.c src/packagelist.c src/downloader.c src/urls.c
 
 pacx: src/pacx.c src/downloader.c src/urls.c
 	mkdir -p bin
-	cc $(files) -o bin/pacx -fsanitize=address -g -pthread
+	cc $(codeFiles) -o bin/pacx -fsanitize=address -g -pthread
 
 build-release: src/pacx.c src/downloader.c src/urls.c
 	mkdir bin/release -p
-	cc $(files) -o bin/release/pacx -O3
+	cc $(codeFiles) -o bin/release/pacx -O3
