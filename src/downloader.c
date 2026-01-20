@@ -2,7 +2,6 @@
 #include "colors.h"
 #include "packageinfo.h"
 #include "packagelist.h"
-#include "urls.h"
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -14,84 +13,97 @@ void getDetails(char *summary, packageInfo **package) {
 
   char *whitespace_ptr;
   char *colon_ptr;
-  char *token = strtok_r(summary, " ", &whitespace_ptr);
-  while (token != NULL) {
 
-    // Fetching the size that has been downloaded
-    if (strstr(token, "%)") != NULL) {
-      char *downloaded = strdup(token);
-      downloaded[strcspn(downloaded, "B/") + 1] = '\0';
-      changePackageInfo(*package, 1, downloaded);
-    }
-    // Getting the speed part from aria2c
-
-    if (strcspn(token, "DL:") == 0) {
-      char retoken[strlen(token)];
-      int j = 0;
-      for (int i = 3; i < strlen(token); i++) {
-        retoken[j++] = token[i];
+  if (strcspn(summary, "[") == 0) {
+    char *token = strtok_r(summary, " ", &whitespace_ptr);
+    while (token != NULL) {
+      // Fetching the size that has been downloaded
+      if (strstr(token, "%)") != NULL) {
+        char *downloaded = strdup(token);
+        downloaded[strcspn(downloaded, "B/") + 1] = '\0';
+        changePackageInfo(*package, 1, downloaded);
       }
-      retoken[strcspn(retoken, "B") + 1] = '\0';
-      if (strcmp("nload", retoken) == 0 || strcmp("nload{", retoken) == 0)
-        changePackageInfo(*package, 3, strdup("0B"));
-      // (*package)->speed = strdup("0B");
-      else
-        changePackageInfo(*package, 3, strdup(retoken));
-      // (*package)->speed = strdup(retoken);
+      // Getting the speed part from aria2c
+
+      if (strcspn(token, "DL:") == 0) {
+        char retoken[strlen(token)];
+        int j = 0;
+        for (int i = 3; i < strlen(token); i++) {
+          retoken[j++] = token[i];
+        }
+        retoken[strcspn(retoken, "B") + 1] = '\0';
+        if (strcmp("nload", retoken) == 0 || strcmp("nload{", retoken) == 0)
+          changePackageInfo(*package, 3, strdup("0B"));
+        // (*package)->speed = strdup("0B");
+        else
+          changePackageInfo(*package, 3, strdup(retoken));
+        // (*package)->speed = strdup(retoken);
+      }
+      // else if (strcspn(token, ""))
+      token = strtok_r(NULL, " ", &whitespace_ptr);
     }
-    // else if (strcspn(token, ""))
-    token = strtok_r(NULL, " ", &whitespace_ptr);
+  }
+}
+
+void replaceNewLineChar(char *string, char new) {
+  int len = strlen(string);
+  for (int i = 0; i < len; i++) {
+    if (string[i] == '\n')
+      string[i] = new;
   }
 }
 
 void downloadPackage(packageInfo *packageInformation) {
-  pid_t processPID;
-  int processPipe[2];
-  pipe(processPipe);
+  char *url = packageInformation->url;
+  // replaceNewLineChar(url, ' ');
+  if (url != NULL) {
 
-  processPID = fork();
-  if (processPID == 0) { // Child process
-    // Process Pipe SetUp
-    close(processPipe[0]);   // No need for reading
-    dup2(processPipe[1], 1); // Piping stdout
-    dup2(processPipe[1], 2); // Piping stderr
-    close(processPipe[1]);
+    if (strcspn(url, "file") == 0) {
+      changePackageInfo(packageInformation, 4, strdup("100%"));
+    } else {
+      pid_t processPID;
+      int processPipe[2];
+      pipe(processPipe);
 
-    // Executing aria2c
-    char *url = getPackageURL(packageInformation->packageName);
+      processPID = fork();
+      if (processPID == 0) { // Child process
+        // Process Pipe SetUp
+        close(processPipe[0]);   // No need for reading
+        dup2(processPipe[1], 1); // Piping stdout
+        dup2(processPipe[1], 2); // Piping stderr
+        close(processPipe[1]);
 
-    char *args[] = {"aria2c",
-                    "--continue",
-                    "--optimize-concurrent-downloads",
-                    "--summary-interval",
-                    UPDATE_INTERVAL,
-                    url,
-                    "-d",
-                    DOWNLOAD_DIRECTORY,
-                    NULL};
-    execvp(args[0], args);
-    free(url);
-  } else if (processPID > 0) {
-    // Parent Process
-    // Reading the stdout of the child process
-    close(processPipe[1]); // We dont want to write to the pipe
-    char buffer[512];
-    while ((read(processPipe[0], buffer, sizeof(buffer))) != 0) {
-      buffer[strcspn(buffer, "\n")] = '\0';
-      char info[strlen(buffer) + 1];
-      strncpy(info, buffer, strlen(buffer) + 1);
-      getDetails(info, &packageInformation);
-      // printf("\r" GREEN "Speed: " WHITE "%s\t " GREEN "Downloaded: " WHITE
-      // "%s",packageInformation->speed, packageInformation->downloaded);
-      // fflush(stdout);
-      // fflush(stderr);
+        // Executing aria2c
+
+        char *args[] = {"aria2c",
+                        "--continue",
+                        "--optimize-concurrent-downloads",
+                        "--summary-interval",
+                        UPDATE_INTERVAL,
+                        url,
+                        "-d",
+                        DOWNLOAD_DIRECTORY,
+                        NULL};
+        execvp(args[0], args);
+        free(url);
+      } else if (processPID > 0) {
+        // Parent Process
+        // Reading the stdout of the child process
+        close(processPipe[1]); // We dont want to write to the pipe
+        char buffer[512];
+        while ((read(processPipe[0], buffer, sizeof(buffer))) != 0) {
+          buffer[strcspn(buffer, "\n")] = '\0';
+          char info[strlen(buffer) + 1];
+          strncpy(info, buffer, strlen(buffer) + 1);
+          getDetails(info, &packageInformation);
+        }
+      } else {
+        printf("Error while downloading the package: %s\n",
+               packageInformation->packageName);
+      }
     }
-  } else {
-    printf("Error while downloading the package: %s\n",
-           packageInformation->packageName);
   }
 }
-
 void *startDownload(void *arg) {
   downloadPackage((packageInfo *)arg);
   return NULL;

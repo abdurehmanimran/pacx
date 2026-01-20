@@ -7,9 +7,10 @@ typedef struct {
   char *totalSize;
   char *speed;
   char *progress;
+  char *url;
 } packageInfo;
 
-void initPackageInfo(packageInfo **package, char *name);
+void initPackageInfo(packageInfo **package, char *name, char *url);
 void freePackageInfo(packageInfo **package);
 void changePackageInfo(packageInfo *package, int opt, char *newValue);
 

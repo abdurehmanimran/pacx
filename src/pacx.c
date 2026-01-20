@@ -22,12 +22,12 @@ int totalArgs;
 packageInfoList packageList;
 
 int main(int argc, char **argv) {
-  // Sudo Permission Check
-  if (getegid() != 0) {
-    puts(GREEN "Alert:" WHITE " You do not have " GREEN "sudo/root " WHITE
-               "permissions!!");
-    return 0;
-  }
+  // // Sudo Permission Check
+  // if (getegid() != 0) {
+  //   puts(GREEN "Alert:" WHITE " You do not have " GREEN "sudo/root " WHITE
+  //              "permissions!!");
+  //   return 0;
+  // }
 
   totalArgs = argc;
   // Argument Management Start
@@ -55,8 +55,14 @@ void printHelp(int currentArg, char **argv) {
 }
 
 void printDownloadInfo(packageInfo *package) {
-  printf(GREEN "%s\tSpeed: " WHITE "%s\t " GREEN "Downloaded: " WHITE "%s\n",
-         package->packageName, package->speed, package->downloaded);
+  if (strcmp(package->progress, "100%") == 0)
+    printf("\x1b[2K" GREEN "%-20s Already Up to Date !!\n",
+           package->packageName);
+
+  else
+    printf(GREEN "%-20sSpeed: " WHITE "%-10s\t " GREEN "Downloaded: " WHITE
+                 "%s\n",
+           package->packageName, package->speed, package->downloaded);
 }
 
 void *printProgress(void *arg) {

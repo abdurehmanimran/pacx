@@ -3,10 +3,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-packageURL getPackageURL(char *package) {
+packageURL getPackageURL(char *package, int ignoreDependencies) {
   FILE *process;
+  char urls[5024];
   char command[256];
-  strcpy(command, "sudo pacman -Sp ");
+  if (ignoreDependencies)
+    strcpy(command, "pacman -Sddp ");
+  else
+    strcpy(command, "pacman -Sp ");
   strcat(command, package);
 
   if ((process = popen(command, "r")) == NULL) {
@@ -14,10 +18,17 @@ packageURL getPackageURL(char *package) {
     exit(1);
   }
   char buffer[1024];
+
   if ((fgets(buffer, 1024, process) == NULL)) {
     printf("Error: failed to get url!");
     exit(1);
+  } else {
+    strcpy(urls, buffer);
   }
-  buffer[strcspn(buffer, "\n")] = '\0';
-  return (packageURL)strdup(buffer);
+
+  while (fgets(buffer, 1024, process) != NULL) {
+    strcat(urls, buffer);
+  }
+  urls[strcspn(urls, "\0") - 1] = '\0';
+  return (packageURL)strdup(urls);
 }

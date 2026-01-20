@@ -1,7 +1,9 @@
 #include "packagelist.h"
 #include "packageinfo.h"
+#include "urls.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 void initPackageList(packageInfoList *packageList) {
   packageList->n = 0;
@@ -39,7 +41,36 @@ void retrievePackages(int argPosition, int totalArgs, char **argv,
     if (argv[argPosition][0] != '-') {
       // Making packageInfo from the argument
       packageInfo *package;
-      initPackageInfo(&package, argv[argPosition]);
+      char *urls = getPackageURL(argv[argPosition], 0);
+      char *url = NULL;
+      char *token = strtok(urls, "\n");
+
+      while (token != NULL) {
+        if (strstr(token, argv[argPosition]) != NULL) {
+          url = strdup(token);
+        } else {
+          // Urls for dependencies provided by pacman
+          char *dependencyName = NULL;
+          char *subtokens;
+          char *subtok_r;
+          subtokens = strtok_r(token, "/", &subtok_r);
+          while (subtokens != NULL) {
+            if (strstr(subtokens, ".pkg.tar.zst") != NULL) {
+              subtokens[strcspn(subtokens, "-")] = '\0';
+              break;
+            }
+            subtokens = strtok_r(NULL, "/", &subtok_r);
+          }
+          dependencyName = strdup(subtokens);
+          char *dependencyURL = getPackageURL(dependencyName, 1);
+          packageInfo *dependency;
+          initPackageInfo(&dependency, dependencyName, dependencyURL);
+          insertPackage(packageList, dependency);
+        }
+        token = strtok(NULL, "\n");
+      }
+
+      initPackageInfo(&package, argv[argPosition], url);
 
       // Adding the packageInfo to the package
       insertPackage(packageList, package);
