@@ -1,11 +1,10 @@
 #include "packageinfo.h"
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 void initPackageInfo(packageInfo **package, char *name, char *url) {
   *package = malloc(sizeof(packageInfo));
-  (*package)->packageName = name;
+  (*package)->packageName = strdup(name);
   (*package)->downloaded = strdup("0B");
   (*package)->progress = strdup("0%");
   (*package)->speed = strdup("0B");
@@ -14,6 +13,7 @@ void initPackageInfo(packageInfo **package, char *name, char *url) {
 }
 
 void freePackageInfo(packageInfo **package) {
+  free((*package)->packageName);
   free((*package)->downloaded);
   free((*package)->speed);
   free((*package)->totalSize);

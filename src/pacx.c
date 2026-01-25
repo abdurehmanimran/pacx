@@ -22,12 +22,12 @@ int totalArgs;
 packageInfoList packageList;
 
 int main(int argc, char **argv) {
-  // // Sudo Permission Check
-  // if (getegid() != 0) {
-  //   puts(GREEN "Alert:" WHITE " You do not have " GREEN "sudo/root " WHITE
-  //              "permissions!!");
-  //   return 0;
-  // }
+  // Sudo Permission Check
+  if (getegid() != 0) {
+    puts(GREEN "Alert:" WHITE " You do not have " GREEN "sudo/root " WHITE
+               "permissions!!");
+    return 0;
+  }
 
   totalArgs = argc;
   // Argument Management Start

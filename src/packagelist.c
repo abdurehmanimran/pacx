@@ -61,14 +61,16 @@ void retrievePackages(int argPosition, int totalArgs, char **argv,
             }
             subtokens = strtok_r(NULL, "/", &subtok_r);
           }
-          dependencyName = strdup(subtokens);
+          dependencyName = subtokens;
           char *dependencyURL = getPackageURL(dependencyName, 1);
           packageInfo *dependency;
-          initPackageInfo(&dependency, dependencyName, dependencyURL);
+          initPackageInfo(&dependency, subtokens, dependencyURL);
           insertPackage(packageList, dependency);
         }
         token = strtok(NULL, "\n");
       }
+      if (urls != NULL)
+        free(urls);
 
       initPackageInfo(&package, argv[argPosition], url);
 
