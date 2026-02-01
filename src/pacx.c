@@ -61,8 +61,9 @@ void printDownloadInfo(packageInfo *package) {
 
   else
     printf(GREEN "%-20sSpeed: " WHITE "%-10s\t " GREEN "Downloaded: " WHITE
-                 "%s\n",
-           package->packageName, package->speed, package->downloaded);
+                 "%-20s\t" GREEN "Total:" WHITE "%-20s\n",
+           package->packageName, package->speed, package->downloaded,
+           package->totalSize);
 }
 
 void *printProgress(void *arg) {

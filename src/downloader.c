@@ -22,6 +22,16 @@ void getDetails(char *summary, packageInfo **package) {
         char *downloaded = strdup(token);
         downloaded[strcspn(downloaded, "B/") + 1] = '\0';
         changePackageInfo(*package, 1, downloaded);
+        char *totalToken;
+        char *totalPtr;
+        totalToken = strtok_r(token, "/", &totalPtr);
+        if (totalToken != NULL) {
+          totalToken = strtok_r(NULL, "/", &totalPtr);
+        }
+        if (totalToken != NULL) {
+          totalToken[strcspn(totalToken, "(")] = '\0';
+          changePackageInfo(*package, 2, strdup(totalToken));
+        }
       }
       // Getting the speed part from aria2c
 
