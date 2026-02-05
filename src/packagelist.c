@@ -31,6 +31,8 @@ void insertPackage(packageInfoList *packageList, packageInfo *package) {
   packageList->packages[packageList->n - 1] = package;
 }
 
+// Function for getting the packages from the command line arguments
+// (in -S option)
 void retrievePackages(int argPosition, int totalArgs, char **argv,
                       packageInfoList *packageList) {
   argPosition++; // Move the position from "-S" to next one

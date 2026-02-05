@@ -6,12 +6,18 @@
 packageURL getPackageURL(char *package, int ignoreDependencies) {
   FILE *process;
   char urls[5024];
-  char command[256];
-  if (ignoreDependencies)
-    strcpy(command, "pacman -Sddp ");
-  else
-    strcpy(command, "pacman -Sp ");
-  strcat(command, package);
+  char command[128];
+
+  if (package != NULL) { // When package name is provided
+    if (ignoreDependencies)
+      strcpy(command, "pacman -Sddp ");
+    else
+      strcpy(command, "pacman -Sp ");
+    strcat(command, package);
+  } else {
+    printf("Error: Package Name is NULL!!");
+    exit(1);
+  }
 
   if ((process = popen(command, "r")) == NULL) {
     printf("Failed to get URL");
