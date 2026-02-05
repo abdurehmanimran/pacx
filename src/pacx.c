@@ -57,10 +57,11 @@ void printDownloadInfo(packageInfo *package) {
            package->packageName);
 
   else
-    printf(GREEN "%-20sSpeed: " WHITE "%-10s\t " GREEN "Downloaded: " WHITE
-                 "%-20s\t" GREEN "Total:" WHITE "%-20s\n",
+    printf(GREEN "%-40sSpeed: " WHITE "%-10s\t " GREEN "Downloaded: " WHITE
+                 "%-20s\t" GREEN "Total:" WHITE "%-20s" GREEN "Progress: " WHITE
+                 "%s\n",
            package->packageName, package->speed, package->downloaded,
-           package->totalSize);
+           package->totalSize, package->progress);
 }
 
 void printDetails(packageInfoList *packageList) {
@@ -112,27 +113,14 @@ void fetchPackages(packageInfoList *packageList) {
 }
 
 void syncPackages(int currentArg, char **argv) {
-  int *isRunning; // Dynamically Allocated to be read by printing thread
-  isRunning = (int *)malloc(sizeof(int));
   // Setup the list of packages
   retrievePackages(currentArg, totalArgs, argv, &packageList);
-  pthread_t *threads;
-  createDownloadThreads(&threads, &packageList);
 
-  *isRunning = 1;
-  pthread_t printingThread;
-  pthread_create(&printingThread, NULL, printProgress, (void *)isRunning);
+  // Getting the packages
+  fetchPackages(&packageList);
 
-  waitForDownloadThreads(&threads, &packageList);
-  *isRunning = 0;
-  pthread_join(printingThread, NULL);
-
-  // Freeing Up Memory
-  free(isRunning);
-  for (int i = 0; i < packageList.n; i++)
-    freePackageInfo(&packageList.packages[i]);
-  free(packageList.packages);
-  free(threads);
+  // Freeing the packageList
+  freePackageList(&packageList);
 }
 
 // Returns a malloced list of packages each on a separate line
@@ -175,7 +163,7 @@ void getUpgradablePackages(packageInfoList *packageList) {
   // Separate pacakage names, Create packageInfo objects,
   // and Insert them into packageInfoList
   while (packageName != NULL) {
-    packageInfo *package = (packageInfo *)malloc(sizeof(packageInfo));
+    packageInfo *package;
     initPackageInfo(&package, packageName, getPackageURL(packageName, 1));
     insertPackage(packageList, package);
     packageName = strtok(NULL, "\n"); // Get the next packageName
@@ -187,11 +175,11 @@ void getUpgradablePackages(packageInfoList *packageList) {
 
   // Get the packages
   fetchPackages(packageList);
+
+  freePackageList(packageList);
 }
 
 void updatePackages(int currentArg, char **argv) {
-  int *isRunning;
-  isRunning = (int *)malloc(sizeof(int));
 
   puts(GREEN "::" WHITE " Starting " GREEN "full system " WHITE "update!!");
   getUpgradablePackages(&packageList);

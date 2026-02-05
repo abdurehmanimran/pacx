@@ -95,6 +95,7 @@ void downloadPackage(packageInfo *packageInformation) {
                         DOWNLOAD_DIRECTORY,
                         NULL};
         execvp(args[0], args);
+        changePackageInfo(packageInformation, 4, strdup("100%"));
         free(url);
       } else if (processPID > 0) {
         // Parent Process

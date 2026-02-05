@@ -7,7 +7,7 @@
 // Interval after which the download info updates
 #define UPDATE_INTERVAL "1"
 // Directory in which the downloaded packages will be placed
-#define DOWNLOAD_DIRECTORY "/var/cache/pacman/pkg/"
+#define DOWNLOAD_DIRECTORY "/usr/share/pacx/cache/"
 
 void getDetails(char *summary, packageInfo **package);
 void downloadPackage(packageInfo *packageInformation);

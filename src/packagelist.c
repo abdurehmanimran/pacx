@@ -31,6 +31,12 @@ void insertPackage(packageInfoList *packageList, packageInfo *package) {
   packageList->packages[packageList->n - 1] = package;
 }
 
+void freePackageList(packageInfoList *packageList) {
+  for (int i = 0; i < packageList->n; i++)
+    freePackageInfo(&packageList->packages[i]);
+  free(packageList->packages);
+}
+
 // Function for getting the packages from the command line arguments
 // (in -S option)
 void retrievePackages(int argPosition, int totalArgs, char **argv,

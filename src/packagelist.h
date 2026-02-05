@@ -10,6 +10,7 @@ typedef struct {
 
 void initPackageList(packageInfoList *packageList);
 void insertPackage(packageInfoList *packageList, packageInfo *package);
+void freePackageList(packageInfoList *packageList);
 void retrievePackages(int argPosition, int totalArgs, char **argv,
                       packageInfoList *packageList);
 
