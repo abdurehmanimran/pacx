@@ -2,6 +2,7 @@
 #define COLORS_H
 
 // Colors for printing
+#define RED "\x1b[31m"
 #define GREEN "\x1b[38:5:2m"
 #define WHITE "\x1b[0m"
 
