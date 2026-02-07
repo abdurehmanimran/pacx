@@ -10,6 +10,7 @@ void initPackageInfo(packageInfo **package, char *name, char *url) {
   (*package)->speed = strdup("0B");
   (*package)->totalSize = strdup("0B");
   (*package)->url = url;
+  (*package)->isDownloading = 1;
 }
 
 void freePackageInfo(packageInfo **package) {

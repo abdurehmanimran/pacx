@@ -8,6 +8,7 @@ typedef struct {
   char *speed;
   char *progress;
   char *url;
+  int isDownloading;
 } packageInfo;
 
 void initPackageInfo(packageInfo **package, char *name, char *url);

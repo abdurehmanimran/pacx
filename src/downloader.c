@@ -1,5 +1,4 @@
 #include "downloader.h"
-#include "colors.h"
 #include "packageinfo.h"
 #include "packagelist.h"
 #include <pthread.h>
@@ -117,6 +116,7 @@ void downloadPackage(packageInfo *packageInformation) {
 }
 void *startDownload(void *arg) {
   downloadPackage((packageInfo *)arg);
+  ((packageInfo *)arg)->isDownloading = 0;
   return NULL;
 }
 
@@ -124,9 +124,6 @@ void createDownloadThreads(pthread_t **threads, packageInfoList *packageList) {
   *threads = (pthread_t *)malloc(sizeof(pthread_t) * packageList->n);
 
   for (int i = 0; i < packageList->n; i++) {
-    printf(GREEN "Launching a thread for Package [%d]: " WHITE "%s\n", i + 1,
-           packageList->packages[i]->packageName);
-    // Creating the threads
     pthread_create(&((*threads)[i]), NULL, startDownload,
                    packageList->packages[i]);
   }

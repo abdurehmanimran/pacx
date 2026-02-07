@@ -72,43 +72,48 @@ void printDetails(packageInfoList *packageList) {
   }
 }
 
-void *printProgress(void *arg) {
-  int *isRunning = ((int *)arg);
-  while (*isRunning) {
+int called = 0;
+void printProgress() {
+  while (1) {
 
     for (int i = 0; i < packageList.n; i++) {
       if (packageList.packages[i]->downloaded != NULL &&
-          packageList.packages[i]->speed != NULL)
+          packageList.packages[i]->speed != NULL &&
+          packageList.packages[i]->isDownloading)
         printDownloadInfo(packageList.packages[i]);
-      else {
+      else if (packageList.packages[i]->isDownloading == 0) {
+        called++;
+        // printf("\x1b[2k");
+        printf("\r\x1b[0k");
+        printf(GREEN "\r%-40s" RED "::" WHITE " Download Completed!!\n",
+               packageList.packages[i]->packageName);
       }
     }
     fflush(stdout);
     fflush(stderr);
-    if (*isRunning) {
-      for (int i = 0; i < packageList.n; i++)
-        MOVE_TO_PREV_LINE;
-      sleep(1);
+    int downloading = 0;
+    for (int i = 0; i < packageList.n; i++) {
+      downloading += packageList.packages[i]->isDownloading;
     }
+    if (downloading <= 0)
+      break;
+
+    // Move cursor n lines up
+    for (int i = 0; i < packageList.n; i++)
+      MOVE_TO_PREV_LINE;
+    sleep(1);
   }
-  return NULL;
+  puts("");
 }
 
 void fetchPackages(packageInfoList *packageList) {
-  int *isRunning; // Dynamically Allocated to be read by printing thread
-  isRunning = (int *)malloc(sizeof(int));
   pthread_t *threads;
   createDownloadThreads(&threads, packageList);
 
-  *isRunning = 1;
-  pthread_t printingThread;
-  pthread_create(&printingThread, NULL, printProgress, (void *)isRunning);
+  printProgress();
 
   waitForDownloadThreads(&threads, packageList);
-  *isRunning = 0;
-  pthread_join(printingThread, NULL);
 
-  free(isRunning);
   free(threads);
 }
 
@@ -168,19 +173,20 @@ void getUpgradablePackages(packageInfoList *packageList) {
     insertPackage(packageList, package);
     packageName = strtok(NULL, "\n"); // Get the next packageName
   }
-
-  // Print brief desciption about the packages that are to be updated
-  printDetails(packageList);
-  puts("");
-
-  // Get the packages
-  fetchPackages(packageList);
-
-  freePackageList(packageList);
 }
 
 void updatePackages(int currentArg, char **argv) {
 
   puts(GREEN "::" WHITE " Starting " GREEN "full system " WHITE "update!!");
   getUpgradablePackages(&packageList);
+
+  // Print brief desciption about the packages that are to be updated
+  printDetails(&packageList);
+  puts("");
+
+  // Get the packages
+  fetchPackages(&packageList);
+
+  // Free the malloced packages part of packaageList
+  freePackageList(&packageList);
 }
