@@ -41,7 +41,7 @@ int main(int argc, char **argv) {
   } else {
     // Iterating through the arguments
     // To be Fixed !!! At this moment it only checks for the first argument
-    for (int i = 1; i < (sizeof(args) / sizeof(Argument)); i++) {
+    for (int i = 0; i < (sizeof(args) / sizeof(Argument)); i++) {
       if (strcmp(args[i].arg, argv[1]) == 0) {
         args[i].operation(1, argv);
         return 0;
