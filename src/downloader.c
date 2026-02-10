@@ -18,12 +18,19 @@ void getDetails(char *summary, packageInfo **package) {
     while (token != NULL) {
       // Fetching the size that has been downloaded
       if (strstr(token, "%)") != NULL) {
-        char *downloaded = strdup(token);
+        // Getting the size of package that has been downloaded
+        char downloaded[64];
+        strcpy(downloaded, token);
+        // char *downloaded = strdup(token);
         downloaded[strcspn(downloaded, "B/") + 1] = '\0';
-        changePackageInfo(*package, 1, downloaded);
+        changePackageInfo(*package, 1, strdup(downloaded));
+
+        // Getting the total size of the package
+        char nextToken[64];
         char *totalToken;
+        strcpy(nextToken, token);
         char *totalPtr;
-        totalToken = strtok_r(token, "/", &totalPtr);
+        totalToken = strtok_r(nextToken, "/", &totalPtr);
         if (totalToken != NULL) {
           totalToken = strtok_r(NULL, "/", &totalPtr);
         }
@@ -31,6 +38,14 @@ void getDetails(char *summary, packageInfo **package) {
           totalToken[strcspn(totalToken, "(")] = '\0';
           changePackageInfo(*package, 2, strdup(totalToken));
         }
+        // Getting the download progress for the package
+        char *progressTok;
+        char *progressString = strtok_r(token, "(", &progressTok);
+        progressString = strtok_r(NULL, "(", &progressTok);
+        if (progressString != NULL)
+          (*package)->progress = atoi(progressString);
+        else
+          (*package)->progress = 0;
       }
       // Getting the speed part from aria2c
 
@@ -68,7 +83,8 @@ void downloadPackage(packageInfo *packageInformation) {
   if (url != NULL) {
 
     if (strcspn(url, "file") == 0) {
-      changePackageInfo(packageInformation, 4, strdup("100%"));
+      // changePackageInfo(packageInformation, 4, strdup("100%"));
+      packageInformation->progress = 100;
     } else {
       pid_t processPID;
       int processPipe[2];
@@ -94,7 +110,8 @@ void downloadPackage(packageInfo *packageInformation) {
                         DOWNLOAD_DIRECTORY,
                         NULL};
         execvp(args[0], args);
-        changePackageInfo(packageInformation, 4, strdup("100%"));
+        // changePackageInfo(packageInformation, 4, strdup("100%"));
+        packageInformation->progress = 100;
         free(url);
       } else if (processPID > 0) {
         // Parent Process
@@ -116,7 +133,7 @@ void downloadPackage(packageInfo *packageInformation) {
 }
 void *startDownload(void *arg) {
   downloadPackage((packageInfo *)arg);
-  ((packageInfo *)arg)->isDownloading = 0;
+  ((packageInfo *)arg)->notFinished = 0;
   return NULL;
 }
 
@@ -127,7 +144,6 @@ void createDownloadThreads(pthread_t **threads, packageInfoList *packageList) {
     pthread_create(&((*threads)[i]), NULL, startDownload,
                    packageList->packages[i]);
   }
-  puts("");
 }
 
 void waitForDownloadThreads(pthread_t **threads, packageInfoList *packageList) {

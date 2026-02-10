@@ -6,11 +6,11 @@ void initPackageInfo(packageInfo **package, char *name, char *url) {
   *package = malloc(sizeof(packageInfo));
   (*package)->packageName = strdup(name);
   (*package)->downloaded = strdup("0B");
-  (*package)->progress = strdup("0%");
   (*package)->speed = strdup("0B");
   (*package)->totalSize = strdup("0B");
   (*package)->url = url;
-  (*package)->isDownloading = 1;
+  (*package)->progress = 0;
+  (*package)->notFinished = 1;
 }
 
 void freePackageInfo(packageInfo **package) {
@@ -18,7 +18,6 @@ void freePackageInfo(packageInfo **package) {
   free((*package)->downloaded);
   free((*package)->speed);
   free((*package)->totalSize);
-  free((*package)->progress);
   free((*package)->url);
   free(*package);
 }
@@ -43,12 +42,6 @@ void changePackageInfo(packageInfo *package, int opt, char *newValue) {
     package->speed = NULL;
     free(temp);
     package->speed = newValue;
-    break;
-  case 4:
-    temp = package->progress;
-    package->progress = NULL;
-    free(temp);
-    package->progress = newValue;
     break;
   }
 }

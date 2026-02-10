@@ -1,3 +1,6 @@
+//                      Pacx - A Pacman Wrapper
+// A simple hobby project by Abdur Rehman Imran <arehmanimran4@gmail.com>
+
 #include "pacx.h"
 #include "colors.h"
 #include "downloader.h"
@@ -18,13 +21,16 @@ Argument args[] = {{"-h", printHelp},        {"--help", printHelp},
 int totalArgs;
 packageInfoList packageList;
 
-int main(int argc, char **argv) {
-  // Sudo Permission Check
+int isSudo() {
   if (getegid() != 0) {
     puts(GREEN "Alert:" WHITE " You do not have " GREEN "sudo/root " WHITE
                "permissions!!");
     return 0;
   }
+  return 1;
+}
+
+int main(int argc, char **argv) {
 
   totalArgs = argc;
   // Argument Management Start
@@ -46,20 +52,29 @@ int main(int argc, char **argv) {
 }
 
 void printHelp(int currentArg, char **argv) {
-  printf(GREEN "Pacx\t" WHITE "A pacman wrapper\n" GREEN "usage:\t" WHITE
-               "pacx <operation> [...]\n" GREEN "operations:\n\t" WHITE
-               "pacx {-h --help}\n");
+  printf(GREEN "Pacx\t" RED "A Pacman Wrapper\n");
+  printf(GREEN "usage:\t" RED "pacx " WHITE "<operation> [...]\n");
+  printf(GREEN "Operations:\n\t" WHITE);
+  printf(RED "pacx " WHITE "{"
+             "-S --sync" WHITE "}\n\t");
+  printf(RED "pacx " WHITE "{-Su}\n\t");
+  printf(RED "pacx " WHITE "{-h --help}\n");
 }
 
 void printDownloadInfo(packageInfo *package) {
-  if (strcmp(package->progress, "100%") == 0)
-    printf("\x1b[2K" GREEN "%-20s Already Up to Date !!\n",
+  if (package->progress >= 100) {
+    printf("                                                                   "
+           "            "
+           "                   "
+           "   \n");
+    MOVE_TO_PREV_LINE;
+    printf(GREEN "%-40s" RED "::" WHITE " Download Completed!!\n",
            package->packageName);
-
-  else
-    printf(GREEN "%-40sSpeed: " WHITE "%-10s\t " GREEN "Downloaded: " WHITE
-                 "%-20s\t" GREEN "Total:" WHITE "%-20s" GREEN "Progress: " WHITE
-                 "%s\n",
+    return;
+  } else
+    printf(GREEN "%-30sSpeed: " WHITE "%-10s\t " GREEN "Downloaded: " WHITE
+                 "%-10s\t" GREEN "Total: " WHITE "%-10s" GREEN
+                 "Progress: " WHITE "%-5d\n",
            package->packageName, package->speed, package->downloaded,
            package->totalSize, package->progress);
 }
@@ -67,7 +82,7 @@ void printDownloadInfo(packageInfo *package) {
 void printDetails(packageInfoList *packageList) {
   printf(GREEN ":: No of Packages: " WHITE "%d\n", packageList->n);
   for (int i = 0; i < packageList->n; i++) {
-    printf(GREEN "[%d]: " WHITE "%s\n", i + 1,
+    printf(GREEN "[%d]:\t" WHITE "%s\n", i + 1,
            packageList->packages[i]->packageName);
   }
 }
@@ -78,28 +93,20 @@ void printProgress() {
 
     for (int i = 0; i < packageList.n; i++) {
       if (packageList.packages[i]->downloaded != NULL &&
-          packageList.packages[i]->speed != NULL &&
-          packageList.packages[i]->isDownloading)
+          packageList.packages[i]->speed != NULL)
         printDownloadInfo(packageList.packages[i]);
-      else if (packageList.packages[i]->isDownloading == 0) {
-        called++;
-        // printf("\x1b[2k");
-        printf("\r\x1b[0k");
-        printf(GREEN "\r%-40s" RED "::" WHITE " Download Completed!!\n",
-               packageList.packages[i]->packageName);
-      }
     }
     fflush(stdout);
     fflush(stderr);
     int downloading = 0;
     for (int i = 0; i < packageList.n; i++) {
-      downloading += packageList.packages[i]->isDownloading;
+      downloading += packageList.packages[i]->notFinished;
     }
     if (downloading <= 0)
       break;
 
     // Move cursor n lines up
-    for (int i = 0; i < packageList.n; i++)
+    for (int i = 0; i < (packageList.n); i++)
       MOVE_TO_PREV_LINE;
     sleep(1);
   }
@@ -118,8 +125,14 @@ void fetchPackages(packageInfoList *packageList) {
 }
 
 void syncPackages(int currentArg, char **argv) {
+  if (!isSudo())
+    exit(1);
   // Setup the list of packages
   retrievePackages(currentArg, totalArgs, argv, &packageList);
+
+  // Print the details
+  printDetails(&packageList);
+  printf("________________________________\n");
 
   // Getting the packages
   fetchPackages(&packageList);
@@ -176,6 +189,8 @@ void getUpgradablePackages(packageInfoList *packageList) {
 }
 
 void updatePackages(int currentArg, char **argv) {
+  if (!isSudo())
+    exit(1);
 
   puts(GREEN "::" WHITE " Starting " GREEN "full system " WHITE "update!!");
   getUpgradablePackages(&packageList);

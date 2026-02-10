@@ -6,9 +6,9 @@ typedef struct {
   char *downloaded;
   char *totalSize;
   char *speed;
-  char *progress;
   char *url;
-  int isDownloading;
+  int progress;
+  int notFinished;
 } packageInfo;
 
 void initPackageInfo(packageInfo **package, char *name, char *url);
