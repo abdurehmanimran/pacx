@@ -1,4 +1,4 @@
-codeFiles := src/pacx.c src/packageinfo.c src/packagelist.c src/downloader.c src/urls.c
+codeFiles := src/pacx.c src/packageinfo.c src/packagelist.c src/downloader.c src/urls.c src/print.c
 
 pacx: src/pacx.c src/downloader.c src/urls.c
 	mkdir -p bin
