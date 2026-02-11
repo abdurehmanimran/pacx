@@ -134,6 +134,7 @@ void downloadPackage(packageInfo *packageInformation) {
 void *startDownload(void *arg) {
   downloadPackage((packageInfo *)arg);
   ((packageInfo *)arg)->notFinished = 0;
+  ((packageInfo *)arg)->progress = 100;
   return NULL;
 }
 

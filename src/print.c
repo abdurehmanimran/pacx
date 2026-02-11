@@ -40,8 +40,8 @@ void printDetails(packageInfoList *packageList) {
   }
 }
 
-int called = 0;
 void printProgress(packageInfoList *packageList) {
+  int downloading = packageList->n;
   while (1) {
 
     for (int i = 0; i < packageList->n; i++) {
@@ -51,12 +51,13 @@ void printProgress(packageInfoList *packageList) {
     }
     fflush(stdout);
     fflush(stderr);
-    int downloading = 0;
+    if (downloading <= 0)
+      break;
+
+    downloading = 0;
     for (int i = 0; i < packageList->n; i++) {
       downloading += packageList->packages[i]->notFinished;
     }
-    if (downloading <= 0)
-      break;
 
     // Move cursor n lines up
     for (int i = 0; i < (packageList->n); i++)
