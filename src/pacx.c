@@ -69,9 +69,9 @@ void syncPackages(int currentArg, char **argv) {
   // Setup the list of packages
   retrievePackages(currentArg, totalArgs, argv, &packageList);
 
-  // Print the details
+  // Print the details (i.e Package Names)
   printDetails(&packageList);
-  printf("________________________________\n");
+  puts("");
 
   // Getting the packages
   fetchPackages(&packageList);
@@ -107,6 +107,7 @@ char *getUpgradablePackakgeName() {
   return strdup(packageNames);
 }
 
+// Creates a packageList from the string of packageNames
 void getUpgradablePackages(packageInfoList *packageList) {
   char *packageNames = getUpgradablePackakgeName();
   initPackageList(packageList);

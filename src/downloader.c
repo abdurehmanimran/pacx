@@ -85,6 +85,7 @@ void downloadPackage(packageInfo *packageInformation) {
     if (strcspn(url, "file") == 0) {
       // changePackageInfo(packageInformation, 4, strdup("100%"));
       packageInformation->progress = 100;
+      packageInformation->notFinished = 0;
     } else {
       pid_t processPID;
       int processPipe[2];
