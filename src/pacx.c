@@ -15,9 +15,10 @@
 #include <sys/types.h>
 #include <unistd.h>
 
-Argument args[] = {{"-h", printHelp},        {"--help", printHelp},
-                   {"-S", syncPackages},     {"-s", syncPackages},
-                   {"--sync", syncPackages}, {"-Su", updatePackages}};
+Argument args[] = {
+    {"-h", printHelp},    {"--help", printHelp},    {"-S", syncPackages},
+    {"-s", syncPackages}, {"--sync", syncPackages}, {"-Su", updatePackages},
+};
 
 int totalArgs;
 packageInfoList packageList;

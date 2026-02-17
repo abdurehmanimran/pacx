@@ -1,4 +1,5 @@
 #include "urls.h"
+#include "colors.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -15,7 +16,7 @@ packageURL getPackageURL(char *package, int ignoreDependencies) {
       strcpy(command, "pacman -Sp ");
     strcat(command, package);
   } else {
-    printf("Error: Package Name is NULL!!");
+    printf(RED "Error: " WHITE "Package Name is NULL!!");
     exit(1);
   }
 
@@ -26,7 +27,7 @@ packageURL getPackageURL(char *package, int ignoreDependencies) {
   char buffer[1024];
 
   if ((fgets(buffer, 1024, process) == NULL)) {
-    printf("Error: failed to get url!");
+    printf(RED "Error:" WHITE " No URL found for the package: %s\n", package);
     exit(1);
   } else {
     strcpy(urls, buffer);

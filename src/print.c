@@ -1,3 +1,4 @@
+#include "print.h"
 #include "colors.h"
 #include "packagelist.h"
 #include "pacx.h"
@@ -16,11 +17,7 @@ void printHelp(int currentArg, char **argv) {
 
 void printDownloadInfo(packageInfo *package) {
   if (package->progress >= 100) {
-    printf("                                                                   "
-           "            "
-           "                   "
-           "   \n");
-    MOVE_TO_PREV_LINE;
+    printf("\x1B[K");
     printf(GREEN "%-40s" RED "::" WHITE " Download Completed!!\n",
            package->packageName);
     return;
@@ -60,8 +57,11 @@ void printProgress(packageInfoList *packageList) {
     }
 
     // Move cursor n lines up
-    for (int i = 0; i < (packageList->n); i++)
-      MOVE_TO_PREV_LINE;
+    // printf("\x1B[%dF", packageList->n);
+    MOVE_N_LINES_UP(packageList->n);
+
+    // for (int i = 0; i < (packageList->n); i++)
+    //   MOVE_TO_PREV_LINE;
     sleep(1);
   }
   puts("");
