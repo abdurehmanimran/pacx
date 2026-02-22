@@ -39,6 +39,10 @@ void printDetails(packageInfoList *packageList) {
 
 void printProgress(packageInfoList *packageList) {
   int downloading = packageList->n;
+
+  HIDE_CURSOR;
+  fflush(stdout);
+
   while (1) {
 
     for (int i = 0; i < packageList->n; i++) {
@@ -47,7 +51,6 @@ void printProgress(packageInfoList *packageList) {
         printDownloadInfo(packageList->packages[i]);
     }
     fflush(stdout);
-    fflush(stderr);
     if (downloading <= 0)
       break;
 
@@ -56,13 +59,10 @@ void printProgress(packageInfoList *packageList) {
       downloading += packageList->packages[i]->notFinished;
     }
 
-    // Move cursor n lines up
-    // printf("\x1B[%dF", packageList->n);
     MOVE_N_LINES_UP(packageList->n);
 
-    // for (int i = 0; i < (packageList->n); i++)
-    //   MOVE_TO_PREV_LINE;
     sleep(1);
   }
   puts("");
+  SHOW_CURSOR;
 }
