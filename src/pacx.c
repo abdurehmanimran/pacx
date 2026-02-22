@@ -55,10 +55,9 @@ int main(int argc, char **argv) {
 
 void fetchPackages(packageInfoList *packageList) {
   pthread_t *threads;
+
   createDownloadThreads(&threads, packageList);
-
   printProgress(packageList);
-
   waitForDownloadThreads(&threads, packageList);
 
   free(threads);
@@ -129,6 +128,15 @@ void getUpgradablePackages(packageInfoList *packageList) {
   }
 }
 
+void execute(char **args) {
+  pid_t process;
+  process = fork();
+
+  if (process == 0) {
+    execvp(args[0], args);
+  }
+}
+
 void updatePackages(int currentArg, char **argv) {
   if (!isSudo())
     exit(1);
@@ -145,4 +153,15 @@ void updatePackages(int currentArg, char **argv) {
 
   // Free the malloced packages part of packaageList
   freePackageList(&packageList);
+
+  // Copy the downladed packages
+  char *cpxArgs[] = {"sh", "-c",
+                     "mv /usr/share/pacx/cache/* /var/cache/pacman/pkg/", NULL};
+  // execvp(cpxArgs[0], cpxArgs);
+  execute(cpxArgs);
+  printf(GREEN " ::" WHITE " Successfully " GREEN "moved" WHITE " packages!!");
+
+  char *pacmanArgs[] = {"pacman", "-Su", NULL};
+  // execvp(pacmanArgs[0], pacmanArgs);
+  execvp(pacmanArgs[0], pacmanArgs);
 }
