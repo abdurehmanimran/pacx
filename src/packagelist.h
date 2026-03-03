@@ -9,9 +9,10 @@ typedef struct {
 } packageInfoList;
 
 void initPackageList(packageInfoList *packageList);
-void insertPackage(packageInfoList *packageList, packageInfo *package);
+int insertPackage(packageInfoList *packageList, packageInfo *package);
 void freePackageList(packageInfoList *packageList);
 void retrievePackages(int argPosition, int totalArgs, char **argv,
                       packageInfoList *packageList);
+void popPackage(packageInfoList *packageList, packageInfo *package);
 
 #endif // !PACKAGE_LIST_H

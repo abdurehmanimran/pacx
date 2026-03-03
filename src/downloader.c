@@ -130,9 +130,11 @@ void downloadPackage(packageInfo *packageInformation) {
   }
 }
 void *startDownload(void *arg) {
+  ((packageInfo *)arg)->downloadStarted = 1;
   downloadPackage((packageInfo *)arg);
   ((packageInfo *)arg)->notFinished = 0;
   ((packageInfo *)arg)->progress = 100;
+  pthread_exit(NULL);
   return NULL;
 }
 

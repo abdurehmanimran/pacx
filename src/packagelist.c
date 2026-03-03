@@ -14,7 +14,7 @@ void initPackageList(packageInfoList *packageList) {
     puts("Error: Failed to allocate memory for packageList");
 }
 
-void insertPackage(packageInfoList *packageList, packageInfo *package) {
+int insertPackage(packageInfoList *packageList, packageInfo *package) {
   packageList->n++;
 
   if (packageList->capacity < packageList->n) {
@@ -29,6 +29,20 @@ void insertPackage(packageInfoList *packageList, packageInfo *package) {
   }
 
   packageList->packages[packageList->n - 1] = package;
+  return packageList->n - 1;
+}
+
+void popPackage(packageInfoList *packageList, packageInfo *package) {
+  int index = 0;
+  while (strcmp(packageList->packages[index]->packageName,
+                package->packageName) != 0)
+    index++;
+  // freePackageInfo(&(packageList->packages[index]));
+
+  for (int i = index; i < packageList->n; i++) {
+    packageList->packages[i] = packageList->packages[i + 1];
+  }
+  packageList->n--;
 }
 
 void freePackageList(packageInfoList *packageList) {

@@ -15,6 +15,12 @@ void printHelp(int currentArg, char **argv) {
   printf(RED "pacx " WHITE "{-h --help}\n");
 }
 
+void printCompleted(packageInfo *package) {
+  printf("\x1B[K"); // Clear line
+  printf(GREEN "%-40s" RED "::" WHITE " Download Completed!!\n",
+         package->packageName);
+}
+
 void printDownloadInfo(packageInfo *package) {
   if (package->progress >= 100) {
     printf("\x1B[K");
@@ -66,3 +72,34 @@ void printProgress(packageInfoList *packageList) {
   puts("");
   SHOW_CURSOR;
 }
+/*
+void printProgress(packageInfoList *packageList) {
+  int downloading = packageList->n;
+
+  HIDE_CURSOR;
+  fflush(stdout);
+
+  while (1) {
+
+    for (int i = 0; i < packageList->n; i++) {
+      if (packageList->packages[i]->downloaded != NULL &&
+          packageList->packages[i]->speed != NULL)
+        printDownloadInfo(packageList->packages[i]);
+    }
+    fflush(stdout);
+    if (downloading <= 0)
+      break;
+
+    downloading = 0;
+    for (int i = 0; i < packageList->n; i++) {
+      downloading += packageList->packages[i]->notFinished;
+    }
+
+    MOVE_N_LINES_UP(packageList->n);
+
+    sleep(1);
+  }
+  puts("");
+  SHOW_CURSOR;
+}
+*/

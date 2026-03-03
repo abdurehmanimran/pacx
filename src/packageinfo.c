@@ -10,6 +10,7 @@ void initPackageInfo(packageInfo **package, char *name, char *url) {
   (*package)->totalSize = strdup("0B");
   (*package)->url = url;
   (*package)->progress = 0;
+  (*package)->downloadStarted = 0;
   (*package)->notFinished = 1;
 }
 
