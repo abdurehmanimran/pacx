@@ -1,9 +1,7 @@
 #include "print.h"
 #include "colors.h"
 #include "packagelist.h"
-#include "pacx.h"
 #include <stdio.h>
-#include <unistd.h>
 
 void printHelp(int currentArg, char **argv) {
   printf(GREEN "Pacx\t" RED "A Pacman Wrapper\n");
@@ -22,12 +20,8 @@ void printCompleted(packageInfo *package) {
 }
 
 void printDownloadInfo(packageInfo *package) {
-  if (package->progress >= 100) {
-    printf("\x1B[K");
-    printf(GREEN "%-40s" RED "::" WHITE " Download Completed!!\n",
-           package->packageName);
-    return;
-  } else
+  if (package->packageName != NULL && package->speed != NULL &&
+      package->downloaded != NULL && package->totalSize != NULL)
     printf(GREEN "%-30sSpeed: " WHITE "%-10s\t " GREEN "Downloaded: " WHITE
                  "%-10s\t" GREEN "Total: " WHITE "%-10s" GREEN
                  "Progress: " WHITE "%-5d\n",
