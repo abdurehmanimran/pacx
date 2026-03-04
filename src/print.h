@@ -7,7 +7,7 @@
 #define HIDE_CURSOR printf("\x1B[?25l")
 #define SHOW_CURSOR printf("\x1B[?25h")
 
-void printProgress(packageInfoList *packageList);
+int getTerminalWidth();
 void printDetails(packageInfoList *packageList);
 void printCompleted(packageInfo *package);
 void printDownloadInfo(packageInfo *package);

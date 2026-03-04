@@ -21,9 +21,9 @@ int insertPackage(packageInfoList *packageList, packageInfo *package) {
     packageList->capacity += 4;
     packageInfo **tempPtr = realloc(
         packageList->packages, (sizeof(packageInfo *) * packageList->capacity));
-    if (tempPtr != NULL)
+    if (tempPtr != NULL) {
       packageList->packages = tempPtr;
-    else {
+    } else {
       puts("Error: Failed to expand the packageList");
     }
   }
@@ -37,9 +37,8 @@ void popPackage(packageInfoList *packageList, packageInfo *package) {
   while (strcmp(packageList->packages[index]->packageName,
                 package->packageName) != 0)
     index++;
-  // freePackageInfo(&(packageList->packages[index]));
 
-  for (int i = index; i < packageList->n; i++) {
+  for (int i = index; i < packageList->n - 1; i++) {
     packageList->packages[i] = packageList->packages[i + 1];
   }
   packageList->n--;

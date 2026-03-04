@@ -1,7 +1,9 @@
 #include "print.h"
 #include "colors.h"
 #include "packagelist.h"
+#include "progress.h"
 #include <stdio.h>
+#include <sys/ioctl.h>
 
 void printHelp(int currentArg, char **argv) {
   printf(GREEN "Pacx\t" RED "A Pacman Wrapper\n");
@@ -13,20 +15,31 @@ void printHelp(int currentArg, char **argv) {
   printf(RED "pacx " WHITE "{-h --help}\n");
 }
 
+int getTerminalWidth() {
+  struct winsize ws;
+  ioctl(0, TIOCGWINSZ, &ws);
+  return ws.ws_col;
+}
+
+int calcColWidth(int percentage) {
+  return (getTerminalWidth() * (double)percentage / 100);
+}
+
 void printCompleted(packageInfo *package) {
   printf("\x1B[K"); // Clear line
-  printf(GREEN "%-40s" RED "::" WHITE " Download Completed!!\n",
-         package->packageName);
+  printf(GREEN "%-*s"
+               " %*s\n",
+         calcColWidth(45), package->packageName, calcColWidth(50),
+         RED "::" WHITE " Download Completed!!");
 }
 
 void printDownloadInfo(packageInfo *package) {
   if (package->packageName != NULL && package->speed != NULL &&
       package->downloaded != NULL && package->totalSize != NULL)
-    printf(GREEN "%-30sSpeed: " WHITE "%-10s\t " GREEN "Downloaded: " WHITE
-                 "%-10s\t" GREEN "Total: " WHITE "%-10s" GREEN
-                 "Progress: " WHITE "%-5d\n",
-           package->packageName, package->speed, package->downloaded,
-           package->totalSize, package->progress);
+    printf(GREEN "%-*s" WHITE " %*s/s\t ", calcColWidth(45),
+           package->packageName, calcColWidth(10), package->speed);
+  printProgress(package->progress, calcColWidth(35));
+  printf(RED "  %d%%\n" WHITE, package->progress);
 }
 
 void printDetails(packageInfoList *packageList) {

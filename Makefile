@@ -1,4 +1,4 @@
-FILES := src/pacx.c src/packageinfo.c src/packagelist.c src/downloader.c src/urls.c src/print.c
+FILES := src/pacx.c src/packageinfo.c src/packagelist.c src/downloader.c src/urls.c src/print.c src/progress.c
 
 WARNING_FLAGS := -Wall -Wextra
 DEBUG_FLAGES:= -g -fsanitize=address

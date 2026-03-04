@@ -90,6 +90,7 @@ void fetchPackages(packageInfoList *packageList) {
 
     if (packagesDownloading.n <= 0) {
       puts("");
+      free(threads);
       return;
     }
 
@@ -101,6 +102,8 @@ void fetchPackages(packageInfoList *packageList) {
     usleep(5000);
   }
   SHOW_CURSOR;
+
+  free(threads);
 }
 
 void syncPackages(int currentArg, char **argv) {
