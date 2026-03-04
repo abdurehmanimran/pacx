@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
 #include <unistd.h>
 
 Argument args[] = {
@@ -42,7 +41,7 @@ int main(int argc, char **argv) {
   } else {
     // Iterating through the arguments
     // To be Fixed !!! At this moment it only checks for the first argument
-    for (int i = 0; i < (sizeof(args) / sizeof(Argument)); i++) {
+    for (size_t i = 0; i < (sizeof(args) / sizeof(Argument)); i++) {
       if (strcmp(args[i].arg, argv[1]) == 0) {
         args[i].operation(1, argv);
         return 0;
@@ -53,14 +52,55 @@ int main(int argc, char **argv) {
   return 0;
 }
 
+#define PARALLEL_DOWNLOADS 10
+
 void fetchPackages(packageInfoList *packageList) {
   pthread_t *threads;
 
-  createDownloadThreads(&threads, packageList);
-  printProgress(packageList);
-  waitForDownloadThreads(&threads, packageList);
+  packageInfoList packagesDownloading;
+  initPackageList(&packagesDownloading);
 
-  free(threads);
+  int initThreads = packageList->n >= PARALLEL_DOWNLOADS ? PARALLEL_DOWNLOADS
+                                                         : packageList->n;
+  int index = initThreads;
+
+  threads = (pthread_t *)malloc(sizeof(pthread_t) * (initThreads));
+
+  for (int i = 0; i < initThreads; i++) {
+    insertPackage(&packagesDownloading, packageList->packages[i]);
+    pthread_create(&threads[i], NULL, startDownload,
+                   packagesDownloading.packages[packagesDownloading.n - 1]);
+  }
+
+  HIDE_CURSOR;
+  while (1) {
+    for (int i = 0; i < packagesDownloading.n; i++) {
+      if (packagesDownloading.packages[i]->progress == 100) {
+        printCompleted(packagesDownloading.packages[i]);
+        popPackage(&packagesDownloading, packagesDownloading.packages[i]);
+        if (index < packageList->n) {
+          insertPackage(&packagesDownloading, packageList->packages[index++]);
+          pthread_create(
+              &threads[i], NULL, startDownload,
+              packagesDownloading.packages[packagesDownloading.n - 1]);
+        } else {
+        }
+      }
+    }
+
+    if (packagesDownloading.n <= 0) {
+      puts("");
+      return;
+    }
+
+    for (int i = 0; i < packagesDownloading.n; i++) {
+      printDownloadInfo(packagesDownloading.packages[i]);
+    }
+    MOVE_N_LINES_UP(packagesDownloading.n);
+
+    usleep(5000);
+  }
+  SHOW_CURSOR;
 }
 
 void syncPackages(int currentArg, char **argv) {
@@ -151,15 +191,16 @@ void updatePackages(int currentArg, char **argv) {
   // Get the packages
   fetchPackages(&packageList);
 
+  // Copy the downladed packages
+  char *mvArgs[] = {"sh", "-c",
+                    "mv /usr/share/pacx/cache/* /var/cache/pacman/pkg/", NULL};
+  execute(mvArgs);
+
+  printf(GREEN " ::" WHITE " Successfully moved" GREEN "%d" WHITE " packages!!",
+         packageList.n);
+
   // Free the malloced packages part of packaageList
   freePackageList(&packageList);
-
-  // Copy the downladed packages
-  char *cpxArgs[] = {"sh", "-c",
-                     "mv /usr/share/pacx/cache/* /var/cache/pacman/pkg/", NULL};
-  // execvp(cpxArgs[0], cpxArgs);
-  execute(cpxArgs);
-  printf(GREEN " ::" WHITE " Successfully " GREEN "moved" WHITE " packages!!");
 
   char *pacmanArgs[] = {"pacman", "-Su", NULL};
   // execvp(pacmanArgs[0], pacmanArgs);
