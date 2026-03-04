@@ -8,6 +8,7 @@ typedef struct {
   void (*operation)(int, char **);
 } Argument;
 
+int isSudo();
 void printHelp(int currentArg, char **argv);
 void syncPackages(int currentArg, char **argv);
 void updatePackages(int currentArg, char **argv);

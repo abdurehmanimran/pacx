@@ -11,7 +11,6 @@ void getDetails(char *summary, packageInfo **package) {
   // Sample Summary: [#243f8f 96KiB/142MiB(0%) CN:1 DL:506KiB ETA:4m48s]
 
   char *whitespace_ptr;
-  char *colon_ptr;
 
   if (strcspn(summary, "[") == 0) {
     char *token = strtok_r(summary, " ", &whitespace_ptr);
@@ -52,7 +51,7 @@ void getDetails(char *summary, packageInfo **package) {
       if (strcspn(token, "DL:") == 0) {
         char retoken[strlen(token)];
         int j = 0;
-        for (int i = 3; i < strlen(token); i++) {
+        for (size_t i = 3; i < strlen(token); i++) {
           retoken[j++] = token[i];
         }
         retoken[strcspn(retoken, "B") + 1] = '\0';
@@ -136,19 +135,4 @@ void *startDownload(void *arg) {
   ((packageInfo *)arg)->progress = 100;
   pthread_exit(NULL);
   return NULL;
-}
-
-void createDownloadThreads(pthread_t **threads, packageInfoList *packageList) {
-  *threads = (pthread_t *)malloc(sizeof(pthread_t) * packageList->n);
-
-  for (int i = 0; i < packageList->n; i++) {
-    pthread_create(&((*threads)[i]), NULL, startDownload,
-                   packageList->packages[i]);
-  }
-}
-
-void waitForDownloadThreads(pthread_t **threads, packageInfoList *packageList) {
-  for (int i = 0; i < packageList->n; i++) {
-    pthread_join((*threads)[i], NULL);
-  }
 }

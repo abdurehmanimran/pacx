@@ -12,8 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <sys/types.h>
-#include <time.h>
 #include <unistd.h>
 
 Argument args[] = {
@@ -43,7 +41,7 @@ int main(int argc, char **argv) {
   } else {
     // Iterating through the arguments
     // To be Fixed !!! At this moment it only checks for the first argument
-    for (int i = 0; i < (sizeof(args) / sizeof(Argument)); i++) {
+    for (size_t i = 0; i < (sizeof(args) / sizeof(Argument)); i++) {
       if (strcmp(args[i].arg, argv[1]) == 0) {
         args[i].operation(1, argv);
         return 0;
@@ -53,18 +51,6 @@ int main(int argc, char **argv) {
   // Argument Management End
   return 0;
 }
-
-/*
-void fetchPackages(packageInfoList *packageList) {
-  pthread_t *threads;
-
-  createDownloadThreads(&threads, packageList);
-  printProgress(packageList);
-  waitForDownloadThreads(&threads, packageList);
-
-  free(threads);
-}
-*/
 
 #define PARALLEL_DOWNLOADS 10
 
