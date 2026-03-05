@@ -12,6 +12,14 @@ or
 ```
 make build-release
 ```
+
+## Installation
+The binary can be installed as,
+```
+make build-release
+sudo make install
+```
+
 ## Preview
 
 https://github.com/user-attachments/assets/c2739f64-f5b2-4062-8bed-ea6b8e1c1ca4
