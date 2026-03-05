@@ -1,7 +1,7 @@
 # Pacx
 A simple pacman wrapper inspired from `powerpill` and `nala`.
 
-# Building
+## Building
 To compile the project form source, clone the repo and run make. The binary will be inside the *bin* directory.
 ```
 git clone https://github.com/abdurehmanimran/pacx.git
@@ -12,14 +12,14 @@ or
 ```
 make build-release
 ```
+## Preview
 
-# Preview
-[![Watch the video](https://raw.githubusercontent.com/abdurehmanimran/pacx/main/preview/thumbnail.jpg)](https://raw.githubusercontent.com/abdurehmanimran/pacx/main/preview/demo.mp4)
+https://github.com/user-attachments/assets/c2739f64-f5b2-4062-8bed-ea6b8e1c1ca4
 
-# Why C?
+## Why C?
 Just so that I could learn and practice C.
 
-# Credit
+## Credit
 - `aria2c` for enabling ultra-fast downloads of packages.
 - `pacman`
-- `powerpill` and `nala` for the idea.
+- `powerpill` and `nala` for inspiration.
