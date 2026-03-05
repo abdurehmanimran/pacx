@@ -14,7 +14,7 @@ make build-release
 ```
 
 # Preview
-[![Watch the video](https://raw.githubusercontent.com/abdurehmanimran/pacx/main/preview/thumbnail.jpg)](https://raw.githubusercontent.com/abdurehmanimran/pacx/main/assets/demo.mp4)
+[![Watch the video](https://raw.githubusercontent.com/abdurehmanimran/pacx/main/preview/thumbnail.jpg)](https://raw.githubusercontent.com/abdurehmanimran/pacx/main/preview/demo.mp4)
 
 # Why C?
 Just so that I could learn and practice C.
