@@ -5,12 +5,12 @@
 
 typedef struct {
   char *arg;
-  void (*operation)(int, char **);
+  void (*operation)();
 } Argument;
 
 int isSudo();
-void printHelp(int currentArg, char **argv);
-void syncPackages(int currentArg, char **argv);
-void updatePackages(int currentArg, char **argv);
+// void printHelp(int currentArg, char **argv);
+void syncPackages();
+void updatePackages();
 
 #endif // !PACX_H

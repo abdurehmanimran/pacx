@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <sys/ioctl.h>
 
-void printHelp(int currentArg, char **argv) {
+void printHelp() {
   printf(GREEN "Pacx\t" RED "A Pacman Wrapper\n");
   printf(GREEN "usage:\t" RED "pacx " WHITE "<operation> [...]\n");
   printf(GREEN "Operations:\n\t" WHITE);

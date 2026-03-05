@@ -39,7 +39,7 @@ int main(int argc, char **argv) {
   totalArgs = argc;
   // Argument Management Start
   if (argc == 1) {
-    printHelp(1, argv);
+    printHelp();
     return 0;
   } else {
     // Iterating through the arguments
@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
       if (strcmp(args[i].arg, argv[1]) == 0) {
         currentArg = 1;
         arguments = argv;
-        args[i].operation(1, argv);
+        args[i].operation();
         return 0;
       }
     }
@@ -181,7 +181,16 @@ void createPackageList(packageInfoList *packageList, int toUpdate) {
   }
 }
 
-void syncPackages(int currentArg, char **argv) {
+void execute(char **args) {
+  pid_t process;
+  process = fork();
+
+  if (process == 0) {
+    execvp(args[0], args);
+  }
+}
+
+void syncPackages() {
   if (!isSudo())
     exit(1);
 
@@ -195,20 +204,41 @@ void syncPackages(int currentArg, char **argv) {
   // Getting the packages
   fetchPackages(&packageList);
 
+  // Move the downladed packages
+  char *mvArgs[] = {"sh", "-c",
+                    "mv /usr/share/pacx/cache/* /var/cache/pacman/pkg/", NULL};
+  execute(mvArgs);
+
+  printf(GREEN " ::" WHITE " Successfully moved" GREEN "%d" WHITE " packages!!",
+         packageList.n);
+
   // Freeing the packageList
   freePackageList(&packageList);
-}
 
-void execute(char **args) {
-  pid_t process;
-  process = fork();
+  char argumentPackages[1024];
+  currentArg = 1;
+  getArgumentPackages(argumentPackages);
 
-  if (process == 0) {
-    execvp(args[0], args);
+  int packages = totalArgs - 2;
+
+  char **pacmanArgs = (char **)malloc(sizeof(char *) * (packages + 3));
+  pacmanArgs[0] = "pacman";
+  pacmanArgs[1] = "-S";
+  pacmanArgs[packages + 2] = NULL;
+
+  char *package = strtok(argumentPackages, " ");
+  if (package != NULL)
+    pacmanArgs[2] = package;
+
+  for (int i = 1; i < packages; i++) {
+    package = strtok(NULL, " ");
+    pacmanArgs[i + 2] = package;
   }
+
+  execvp(pacmanArgs[0], pacmanArgs);
 }
 
-void updatePackages(int currentArg, char **argv) {
+void updatePackages() {
   if (!isSudo())
     exit(1);
 
@@ -222,7 +252,7 @@ void updatePackages(int currentArg, char **argv) {
   // Get the packages
   fetchPackages(&packageList);
 
-  // Copy the downladed packages
+  // Move the downladed packages
   char *mvArgs[] = {"sh", "-c",
                     "mv /usr/share/pacx/cache/* /var/cache/pacman/pkg/", NULL};
   execute(mvArgs);
