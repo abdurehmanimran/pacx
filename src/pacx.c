@@ -20,6 +20,9 @@ Argument args[] = {
 };
 
 int totalArgs;
+char **arguments;
+int currentArg;
+
 packageInfoList packageList;
 
 int isSudo() {
@@ -43,6 +46,8 @@ int main(int argc, char **argv) {
     // To be Fixed !!! At this moment it only checks for the first argument
     for (size_t i = 0; i < (sizeof(args) / sizeof(Argument)); i++) {
       if (strcmp(args[i].arg, argv[1]) == 0) {
+        currentArg = 1;
+        arguments = argv;
         args[i].operation(1, argv);
         return 0;
       }
@@ -106,27 +111,33 @@ void fetchPackages(packageInfoList *packageList) {
   free(threads);
 }
 
-void syncPackages(int currentArg, char **argv) {
-  if (!isSudo())
-    exit(1);
-  // Setup the list of packages
-  retrievePackages(currentArg, totalArgs, argv, &packageList);
+void getArgumentPackages(char *buffer) {
+  currentArg++;
 
-  // Print the details (i.e Package Names)
-  printDetails(&packageList);
-  puts("");
+  strcpy(buffer, arguments[currentArg]);
+  strcat(buffer, " ");
+  currentArg++;
 
-  // Getting the packages
-  fetchPackages(&packageList);
-
-  // Freeing the packageList
-  freePackageList(&packageList);
+  while (currentArg < totalArgs) {
+    strcat(buffer, arguments[currentArg++]);
+    strcat(buffer, " ");
+  }
 }
 
 // Returns a malloced list of packages each on a separate line
-char *getUpgradablePackakgeName() {
+char *getPackageNames(int toUpdate) {
+  char command[2056];
+  if (toUpdate)
+    strcpy(command, "pacman -Su --print-format %n");
+  else {
+    strcpy(command, "pacman -S ");
+    char argumentPackages[1024];
+    getArgumentPackages(argumentPackages);
+    strcat(command, argumentPackages);
+    strcat(command, " --print-format %n");
+  }
+
   FILE *process;
-  char command[] = "pacman -Su --print-format %n";
   char packageNames[2056];
   char buffer[1024];
 
@@ -150,9 +161,8 @@ char *getUpgradablePackakgeName() {
   return strdup(packageNames);
 }
 
-// Creates a packageList from the string of packageNames
-void getUpgradablePackages(packageInfoList *packageList) {
-  char *packageNames = getUpgradablePackakgeName();
+void createPackageList(packageInfoList *packageList, int toUpdate) {
+  char *packageNames = getPackageNames(toUpdate);
   initPackageList(packageList);
 
   char *packageName = strtok(packageNames, "\n");
@@ -171,6 +181,24 @@ void getUpgradablePackages(packageInfoList *packageList) {
   }
 }
 
+void syncPackages(int currentArg, char **argv) {
+  if (!isSudo())
+    exit(1);
+
+  // Setup the list of packages
+  createPackageList(&packageList, 0);
+
+  // Print the details (i.e Package Names)
+  printDetails(&packageList);
+  puts("");
+
+  // Getting the packages
+  fetchPackages(&packageList);
+
+  // Freeing the packageList
+  freePackageList(&packageList);
+}
+
 void execute(char **args) {
   pid_t process;
   process = fork();
@@ -185,7 +213,7 @@ void updatePackages(int currentArg, char **argv) {
     exit(1);
 
   puts(GREEN "::" WHITE " Starting " GREEN "full system " WHITE "update!!");
-  getUpgradablePackages(&packageList);
+  createPackageList(&packageList, 1);
 
   // Print brief desciption about the packages that are to be updated
   printDetails(&packageList);
