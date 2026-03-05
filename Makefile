@@ -10,3 +10,7 @@ pacx: src/pacx.c src/downloader.c src/urls.c
 build-release: src/pacx.c src/downloader.c src/urls.c
 	mkdir bin/release -p
 	cc $(FILES) -o bin/release/pacx -O3
+
+install:
+	mkdir /usr/share/pacx/cache -p
+	cp bin/release/pacx /usr/bin/pacx
