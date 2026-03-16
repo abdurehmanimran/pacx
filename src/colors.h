@@ -3,6 +3,8 @@
 
 // Colors for printing
 #define RED "\x1b[31m"
+#define BLUE "\x1b[34m"
+#define CYAN "\x1b[36m"
 #define GREEN "\x1b[38:5:2m"
 #define WHITE "\x1b[0m"
 
