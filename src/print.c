@@ -22,7 +22,13 @@ int getTerminalWidth() {
 }
 
 int calcColWidth(int percentage) {
-  return (getTerminalWidth() * (double)percentage / 100);
+  int width = getTerminalWidth();
+  if (width <= 100 && percentage >= 50) {
+    percentage -= 5;
+  } else if (width <= 120 && percentage >= 50) {
+    percentage -= 1;
+  }
+  return (width * percentage / 100);
 }
 
 void printCompleted(packageInfo *package) {
@@ -34,13 +40,13 @@ void printCompleted(packageInfo *package) {
 }
 
 void printDownloadInfo(packageInfo *package) {
+  // printf("\x1B[K"); // Clear line
   if (package->packageName != NULL && package->speed != NULL &&
-      package->downloaded != NULL && package->totalSize != NULL &&
-      package->progress != 100) {
+      package->downloaded != NULL && package->totalSize != NULL) {
     printf(GREEN "%-*s" WHITE " %*s/s ", calcColWidth(50), package->packageName,
            calcColWidth(10), package->speed);
-    printProgress(package->progress, calcColWidth(33));
-    printf(RED "  %d%%\n" WHITE, package->progress);
+    printProgress(package->progress, calcColWidth(35));
+    printf(GREEN "%3d%%\n" WHITE, package->progress);
   } else {
     puts("");
   }
