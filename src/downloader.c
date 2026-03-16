@@ -121,6 +121,7 @@ void downloadPackage(packageInfo *packageInformation) {
           strncpy(info, buffer, strlen(buffer) + 1);
           getDetails(info, &packageInformation);
         }
+        packageInformation->progress = 100;
       } else {
         printf("Error while downloading the package: %s\n",
                packageInformation->packageName);
@@ -128,6 +129,7 @@ void downloadPackage(packageInfo *packageInformation) {
     }
   }
 }
+
 void *startDownload(void *arg) {
   ((packageInfo *)arg)->downloadStarted = 1;
   downloadPackage((packageInfo *)arg);

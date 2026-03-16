@@ -57,7 +57,7 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-#define PARALLEL_DOWNLOADS 10
+#define PARALLEL_DOWNLOADS 20
 
 void fetchPackages(packageInfoList *packageList) {
   pthread_t *threads;
