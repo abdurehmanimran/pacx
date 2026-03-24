@@ -138,7 +138,7 @@ char *getPackageNames(int toUpdate) {
   }
 
   FILE *process;
-  char packageNames[2056];
+  char packageNames[5120];
   char buffer[1024];
 
   if ((process = popen(command, "r")) == NULL) {
