@@ -22,7 +22,13 @@ sudo make install
 
 ## Preview
 
+### Sync
 https://github.com/user-attachments/assets/c2739f64-f5b2-4062-8bed-ea6b8e1c1ca4
+
+### Upgrade
+https://github.com/user-attachments/assets/ca5b69bc-4d9b-4673-99e1-77f04b773dec
+
+
 
 ## Why C?
 Just so that I could learn and practice C.
