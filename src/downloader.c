@@ -61,6 +61,7 @@ void getDetails(char *summary, packageInfo **package) {
         else
           changePackageInfo(*package, 3, strdup(retoken));
         // (*package)->speed = strdup(retoken);
+        break;
       }
       // else if (strcspn(token, ""))
       token = strtok_r(NULL, " ", &whitespace_ptr);
@@ -103,6 +104,12 @@ void downloadPackage(packageInfo *packageInformation) {
         char *args[] = {"aria2c",
                         "--continue",
                         "--optimize-concurrent-downloads",
+                        "-s",
+                        "6",
+                        "-x",
+                        "8",
+                        "--file-allocation",
+                        "none",
                         "--summary-interval",
                         UPDATE_INTERVAL,
                         url,

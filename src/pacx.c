@@ -80,7 +80,8 @@ void fetchPackages(packageInfoList *packageList) {
   HIDE_CURSOR;
   while (1) {
     for (int i = 0; i < packagesDownloading.n; i++) {
-      if (packagesDownloading.packages[i]->progress == 100) {
+      if (packagesDownloading.packages[i]->progress == 100 ||
+          packagesDownloading.packages[i]->notFinished == 0) {
         printCompleted(packagesDownloading.packages[i]);
         popPackage(&packagesDownloading, packagesDownloading.packages[i]);
         if (index < packageList->n) {
@@ -196,22 +197,14 @@ void syncPackages() {
 
   // Setup the list of packages
   createPackageList(&packageList, 0);
-
-  // Print the details (i.e Package Names)
   printDetails(&packageList);
   puts("");
-
-  // Getting the packages
   fetchPackages(&packageList);
-
-  // Move the downladed packages
   char *mvArgs[] = {"sh", "-c",
                     "mv /usr/share/pacx/cache/* /var/cache/pacman/pkg/", NULL};
   execute(mvArgs);
-
   printf(GREEN " ::" WHITE " Successfully moved" GREEN "%d" WHITE " packages!!",
          packageList.n);
-
   // Freeing the packageList
   freePackageList(&packageList);
 
@@ -241,22 +234,16 @@ void syncPackages() {
 void updatePackages() {
   if (!isSudo())
     exit(1);
-
   puts(GREEN "::" WHITE " Starting " GREEN "full system " WHITE "update!!");
   createPackageList(&packageList, 1);
-
-  // Print brief desciption about the packages that are to be updated
   printDetails(&packageList);
   puts("");
-
   // Get the packages
   fetchPackages(&packageList);
-
   // Move the downladed packages
   char *mvArgs[] = {"sh", "-c",
                     "mv /usr/share/pacx/cache/* /var/cache/pacman/pkg/", NULL};
   execute(mvArgs);
-
   printf(GREEN " ::" WHITE " Successfully moved" GREEN "%d" WHITE " packages!!",
          packageList.n);
 
@@ -264,6 +251,5 @@ void updatePackages() {
   freePackageList(&packageList);
 
   char *pacmanArgs[] = {"pacman", "-Su", NULL};
-  // execvp(pacmanArgs[0], pacmanArgs);
   execvp(pacmanArgs[0], pacmanArgs);
 }
