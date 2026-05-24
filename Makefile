@@ -12,5 +12,9 @@ build-release: src/pacx.c src/downloader.c src/urls.c
 	cc $(FILES) -o bin/release/pacx -O3
 
 install:
-	mkdir /usr/share/pacx/cache -p
-	cp bin/release/pacx /usr/bin/pacx
+	mkdir -p /usr/local/share/pacx/cache
+	cp bin/release/pacx /usr/local/bin/pacx
+
+uninstall:
+	rm -f /usr/local/bin/pacx
+	rm -rf /usr/local/share/pacx
