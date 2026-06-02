@@ -7,6 +7,13 @@
 #include <string.h>
 #include <unistd.h>
 
+FILE *openLogFile(packageInfo *package) {
+  char logFile[50] = "/usr/share/pacx/log/";
+  strcat(logFile, package->packageName);
+
+  return fopen(logFile, "a");
+}
+
 void getDetails(char *summary, packageInfo **package) {
   // Sample Summary: [#243f8f 96KiB/142MiB(0%) CN:1 DL:506KiB ETA:4m48s]
 
@@ -122,13 +129,17 @@ void downloadPackage(packageInfo *packageInformation) {
         // Reading the stdout of the child process
         close(processPipe[1]); // We dont want to write to the pipe
         char buffer[512];
+        FILE *log = openLogFile(packageInformation);
+
         while ((read(processPipe[0], buffer, sizeof(buffer))) != 0) {
+          fprintf(log, "%s\n", buffer);
           buffer[strcspn(buffer, "\n")] = '\0';
           char info[strlen(buffer) + 1];
           strncpy(info, buffer, strlen(buffer) + 1);
           getDetails(info, &packageInformation);
         }
         packageInformation->progress = 100;
+        fclose(log);
       } else {
         printf("Error while downloading the package: %s\n",
                packageInformation->packageName);
@@ -140,8 +151,12 @@ void downloadPackage(packageInfo *packageInformation) {
 void *startDownload(void *arg) {
   ((packageInfo *)arg)->downloadStarted = 1;
   downloadPackage((packageInfo *)arg);
+  FILE *log = openLogFile((packageInfo *)arg);
+  fprintf(log, "Progress: %d\n", ((packageInfo *)arg)->progress);
+
   ((packageInfo *)arg)->notFinished = 0;
-  ((packageInfo *)arg)->progress = 100;
+  // ((packageInfo *)arg)->progress = 100;
+  fclose(log);
   pthread_exit(NULL);
   return NULL;
 }
