@@ -64,6 +64,7 @@ enum SpeedType { GIGA, MEGA, KILO, NONE };
 
 void calcTotalSpeed(packageInfoList *packageList, char **totalSpeed) {
   // totalInfo = (packageInfo *)malloc(sizeof(packageInfo));
+  enum SpeedType finalType = MEGA;
   double speedInMBs = 0;
 
   for (int i = 0; i < packageList->n; i++) {
@@ -81,22 +82,47 @@ void calcTotalSpeed(packageInfoList *packageList, char **totalSpeed) {
 
     switch (type) {
     case GIGA:
-      speedInMBs += atof(speed) * 1024;
+      speedInMBs += atof(speed) * 1024.0;
       break;
     case MEGA:
       speedInMBs += atof(speed);
       break;
     case KILO:
-      speedInMBs += atof(speed) / 1024;
+      speedInMBs += atof(speed) / 1024.0;
       break;
     case NONE:
-      speedInMBs += atof(speed) / 1024 * 1024;
+      speedInMBs += atof(speed) / (1024.0 * 1024.0);
       break;
     }
   }
 
+  // Deciding the unit of total speed
+  if (speedInMBs >= 1000) {
+    finalType = GIGA;
+    speedInMBs /= 1024;
+  } else if (speedInMBs * 1024 <= 1) {
+    finalType = NONE;
+    speedInMBs *= 1024 * 1024;
+  } else if (speedInMBs <= 1) {
+    finalType = KILO;
+    speedInMBs *= 1024;
+  }
+
   char buffer[24];
-  snprintf(buffer, sizeof(buffer), "%.2gMiB/s", speedInMBs);
+  switch (finalType) {
+  case GIGA:
+    snprintf(buffer, sizeof(buffer), "%.1fGiB/s", speedInMBs);
+    break;
+  case MEGA:
+    snprintf(buffer, sizeof(buffer), "%.1fMiB/s", speedInMBs);
+    break;
+  case KILO:
+    snprintf(buffer, sizeof(buffer), "%.1fKiB/s", speedInMBs);
+    break;
+  case NONE:
+    snprintf(buffer, sizeof(buffer), "%.1fB/s", speedInMBs);
+    break;
+  }
   *totalSpeed = (char *)malloc(sizeof(char) * (strlen(buffer) + 1));
   strcpy(*totalSpeed, buffer);
 }
