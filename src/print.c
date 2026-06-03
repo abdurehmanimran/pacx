@@ -39,14 +39,20 @@ void printCompleted(packageInfo *package) {
          RED "::" WHITE " Download Completed!!");
 }
 
+void printTotal(packageInfo *totalInfo) {
+  printf(GREEN "%-*s" WHITE " %*s/s ", calcColWidth(50), totalInfo->packageName,
+         calcColWidth(10), totalInfo->speed);
+}
+
 void printDownloadInfo(packageInfo *package) {
   // printf("\x1B[K"); // Clear line
   if (package->packageName != NULL && package->speed != NULL &&
       package->downloaded != NULL && package->totalSize != NULL) {
     printf(GREEN "%-*s" WHITE " %*s/s ", calcColWidth(50), package->packageName,
            calcColWidth(10), package->speed);
+    printf(GREEN);
     printProgress(package->progress, calcColWidth(35));
-    printf(GREEN "%3d%%\n" WHITE, package->progress);
+    printf(WHITE "%3d%%\n", package->progress);
   } else {
     puts("");
   }

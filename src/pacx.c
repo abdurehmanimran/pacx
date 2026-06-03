@@ -7,6 +7,7 @@
 #include "packageinfo.h"
 #include "packagelist.h"
 #include "print.h"
+#include "progress.h"
 #include "urls.h"
 #include <pthread.h>
 #include <stdio.h>
@@ -59,6 +60,47 @@ int main(int argc, char **argv) {
 
 #define PARALLEL_DOWNLOADS 20
 
+enum SpeedType { GIGA, MEGA, KILO, NONE };
+
+void calcTotalSpeed(packageInfoList *packageList, char **totalSpeed) {
+  // totalInfo = (packageInfo *)malloc(sizeof(packageInfo));
+  double speedInMBs = 0;
+
+  for (int i = 0; i < packageList->n; i++) {
+    char *speed = packageList->packages[i]->speed;
+    enum SpeedType type;
+
+    if (strstr(speed, "G"))
+      type = GIGA;
+    else if (strstr(speed, "M"))
+      type = MEGA;
+    else if (strstr(speed, "K"))
+      type = KILO;
+    else
+      type = NONE;
+
+    switch (type) {
+    case GIGA:
+      speedInMBs += atof(speed) * 1024;
+      break;
+    case MEGA:
+      speedInMBs += atof(speed);
+      break;
+    case KILO:
+      speedInMBs += atof(speed) / 1024;
+      break;
+    case NONE:
+      speedInMBs += atof(speed) / 1024 * 1024;
+      break;
+    }
+  }
+
+  char buffer[24];
+  snprintf(buffer, sizeof(buffer), "%.2gMiB/s", speedInMBs);
+  *totalSpeed = (char *)malloc(sizeof(char) * (strlen(buffer) + 1));
+  strcpy(*totalSpeed, buffer);
+}
+
 void fetchPackages(packageInfoList *packageList) {
   pthread_t *threads;
 
@@ -103,7 +145,21 @@ void fetchPackages(packageInfoList *packageList) {
     for (int i = 0; i < packagesDownloading.n; i++) {
       printDownloadInfo(packagesDownloading.packages[i]);
     }
-    MOVE_N_LINES_UP(packagesDownloading.n);
+
+    char *totalSpeed;
+    calcTotalSpeed(packageList, &totalSpeed);
+    printf(GREEN);
+    printProgress(100, 2);
+    printf(RED " %s " WHITE, "Total");
+    printf(GREEN);
+    printProgress(100, calcColWidth(60) - 7 - strlen(totalSpeed) - 1);
+    printf(RED " %s " WHITE, totalSpeed);
+    printf(GREEN);
+    printProgress(100, calcColWidth(38));
+    printf("\n");
+    // printf(RED "%3d%%\n", 20);
+
+    MOVE_N_LINES_UP(packagesDownloading.n + 1);
 
     usleep(5000);
   }

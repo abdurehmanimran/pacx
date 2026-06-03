@@ -8,6 +8,7 @@
 #define SHOW_CURSOR printf("\x1B[?25h")
 
 int getTerminalWidth();
+int calcColWidth(int percentage);
 void printDetails(packageInfoList *packageList);
 void printCompleted(packageInfo *package);
 void printDownloadInfo(packageInfo *package);

@@ -1,12 +1,11 @@
 #include "progress.h"
-#include "colors.h"
 #include <stdio.h>
 
 void printProgress(double progress, int width) {
   int dashes = (progress / 100) * width;
 
   for (int i = 0; i < dashes; i++)
-    printf(RED "%s", "\u2501");
+    printf("%s", "\u2501");
   for (int i = 0; i < width - dashes; i++)
-    printf(GREEN "%s", "\u254D");
+    printf("%s", "\u254D");
 }
