@@ -68,6 +68,10 @@ void calcTotalSpeed(packageInfoList *packageList, char **totalSpeed) {
   double speedInMBs = 0;
 
   for (int i = 0; i < packageList->n; i++) {
+    if (packageList->packages[i]->progress == 100 ||
+        packageList->packages[i]->notFinished == 0)
+      continue;
+
     char *speed = packageList->packages[i]->speed;
     enum SpeedType type;
 
