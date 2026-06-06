@@ -1,39 +1,41 @@
 # Pacx
-A simple pacman wrapper inspired from `powerpill` and `nala`.
+A simple blazing-fast Pacman wrapper inspired by **Powerpill** and **Nala** that makes package management feel effortless and enjoyable.
 
-## Building
-To compile the project form source, clone the repo and run make. The binary will be inside the *bin* directory.
+This lightweight wrapper brings the speed of parallel downloads to your Arch Linux system using `aria2c`, while keeping things simple and elegant and having a beautiful and intuitive interface inspired by **Nala**
+
+## Compilation
+To compile the project from source code, clone the repository and run `make`. The binary will be inside the **bin** directory.
+
 ```
 git clone https://github.com/abdurehmanimran/pacx.git
 cd pacx
 make
 ```
-or
+or optimized builds:
 ```
 make build-release
 ```
 
 ## Installation
-The binary can be installed as,
+The binary can be installed as:
+
 ```
 make build-release
 sudo make install
 ```
 
-## Preview
+## See It In Action
 
-### Sync
-https://github.com/user-attachments/assets/c2739f64-f5b2-4062-8bed-ea6b8e1c1ca4
+<img width="1908" height="1022" alt="image" src="https://github.com/user-attachments/assets/1b18e5da-5083-495b-aa08-ef676d6ba71b" />
 
-### Upgrade
-https://github.com/user-attachments/assets/ca5b69bc-4d9b-4673-99e1-77f04b773dec
 
+<img width="1908" height="1022" alt="image" src="https://github.com/user-attachments/assets/46330bb5-e4af-4694-a24f-72eae1d8b1d0" />
 
 
 ## Why C?
 Just so that I could learn and practice C.
 
 ## Credit
-- `aria2c` for enabling ultra-fast downloads of packages.
-- `pacman`
-- `powerpill` and `nala` for inspiration.
+- `aria2c` for making ultra-fast downloads of packages possible.
+- `pacman` for the solid foundation.
+- `powerpill` and `nala` for inspiring the beautiful and elegant design.
