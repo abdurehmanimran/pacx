@@ -7,7 +7,6 @@
 #include "packageinfo.h"
 #include "packagelist.h"
 #include "print.h"
-#include "progress.h"
 #include "urls.h"
 #include <pthread.h>
 #include <stdio.h>
@@ -60,75 +59,62 @@ int main(int argc, char **argv) {
 
 #define PARALLEL_DOWNLOADS 20
 
-enum SpeedType { GIGA, MEGA, KILO, NONE };
+void addAmount(const char *amount, double *total) {
 
-void calcTotalSpeed(packageInfoList *packageList, char **totalSpeed) {
-  // totalInfo = (packageInfo *)malloc(sizeof(packageInfo));
-  enum SpeedType finalType = MEGA;
+  if (strstr(amount, "G"))
+    *total += atof(amount) * 1024.0;
+  else if (strstr(amount, "M"))
+    *total += atof(amount);
+  else if (strstr(amount, "K"))
+    *total += atof(amount) / 1024.0;
+  else
+    *total += atof(amount) / (1024.0 * 1024.0);
+}
+
+void chooseUnit(double amount, char *buffer) {
+  char tempBuffer[24];
+
+  if (amount >= 1000) {
+    amount /= 1024;
+    snprintf(tempBuffer, sizeof(tempBuffer), "%.1fGiB", amount);
+  } else if (amount * 1024 <= 1) {
+    amount *= 1024 * 1024;
+    snprintf(tempBuffer, sizeof(tempBuffer), "%.1fB", amount);
+  } else if (amount <= 1) {
+    amount *= 1024;
+    snprintf(tempBuffer, sizeof(tempBuffer), "%.1fKiB", amount);
+  } else
+    snprintf(tempBuffer, sizeof(tempBuffer), "%.1fMiB", amount);
+
+  strcpy(buffer, tempBuffer);
+}
+
+void calcTotalSpeed(packageInfoList *packageList, char **totalSpeed,
+                    char **totalDownloaded) {
   double speedInMBs = 0;
+  double downloadedInMBs = 0;
 
   for (int i = 0; i < packageList->n; i++) {
+    addAmount(packageList->packages[i]->downloaded, &downloadedInMBs);
+
     if (packageList->packages[i]->progress == 100 ||
         packageList->packages[i]->notFinished == 0)
       continue;
 
-    char *speed = packageList->packages[i]->speed;
-    enum SpeedType type;
-
-    if (strstr(speed, "G"))
-      type = GIGA;
-    else if (strstr(speed, "M"))
-      type = MEGA;
-    else if (strstr(speed, "K"))
-      type = KILO;
-    else
-      type = NONE;
-
-    switch (type) {
-    case GIGA:
-      speedInMBs += atof(speed) * 1024.0;
-      break;
-    case MEGA:
-      speedInMBs += atof(speed);
-      break;
-    case KILO:
-      speedInMBs += atof(speed) / 1024.0;
-      break;
-    case NONE:
-      speedInMBs += atof(speed) / (1024.0 * 1024.0);
-      break;
-    }
+    addAmount(packageList->packages[i]->speed, &speedInMBs);
   }
 
-  // Deciding the unit of total speed
-  if (speedInMBs >= 1000) {
-    finalType = GIGA;
-    speedInMBs /= 1024;
-  } else if (speedInMBs * 1024 <= 1) {
-    finalType = NONE;
-    speedInMBs *= 1024 * 1024;
-  } else if (speedInMBs <= 1) {
-    finalType = KILO;
-    speedInMBs *= 1024;
-  }
+  char partialSpeed[24], partialDownloaded[24];
+  chooseUnit(speedInMBs, partialSpeed);
+  chooseUnit(downloadedInMBs, partialDownloaded);
 
-  char buffer[24];
-  switch (finalType) {
-  case GIGA:
-    snprintf(buffer, sizeof(buffer), "%.1fGiB/s", speedInMBs);
-    break;
-  case MEGA:
-    snprintf(buffer, sizeof(buffer), "%.1fMiB/s", speedInMBs);
-    break;
-  case KILO:
-    snprintf(buffer, sizeof(buffer), "%.1fKiB/s", speedInMBs);
-    break;
-  case NONE:
-    snprintf(buffer, sizeof(buffer), "%.1fB/s", speedInMBs);
-    break;
-  }
-  *totalSpeed = (char *)malloc(sizeof(char) * (strlen(buffer) + 1));
-  strcpy(*totalSpeed, buffer);
+  *totalDownloaded =
+      (char *)malloc(sizeof(char) * (strlen(partialDownloaded) + 1));
+  strcpy(*totalDownloaded, partialDownloaded);
+
+  strcat(partialSpeed, "/s");
+  *totalSpeed = (char *)malloc(sizeof(char) * (strlen(partialSpeed) + 1));
+  strcpy(*totalSpeed, partialSpeed);
 }
 
 void fetchPackages(packageInfoList *packageList) {
@@ -176,18 +162,9 @@ void fetchPackages(packageInfoList *packageList) {
       printDownloadInfo(packagesDownloading.packages[i]);
     }
 
-    char *totalSpeed;
-    calcTotalSpeed(packageList, &totalSpeed);
-    printf(GREEN);
-    printProgress(100, 2);
-    printf(RED " %s " WHITE, "Total");
-    printf(GREEN);
-    printProgress(100, calcColWidth(60) - 7 - strlen(totalSpeed) - 1);
-    printf(RED " %s " WHITE, totalSpeed);
-    printf(GREEN);
-    printProgress(100, calcColWidth(38));
-    printf("\n");
-    // printf(RED "%3d%%\n", 20);
+    char *totalSpeed, *totalDownloaded;
+    calcTotalSpeed(packageList, &totalSpeed, &totalDownloaded);
+    printTotalStats(totalDownloaded, totalSpeed);
 
     MOVE_N_LINES_UP(packagesDownloading.n + 1);
 

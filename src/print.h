@@ -12,6 +12,7 @@ int calcColWidth(int percentage);
 void printDetails(packageInfoList *packageList);
 void printCompleted(packageInfo *package);
 void printDownloadInfo(packageInfo *package);
+void printTotalStats(char *totalDownloaded, char *totalSpeed);
 void printHelp();
 
 #endif // !PRINT_H

@@ -3,6 +3,7 @@
 #include "packagelist.h"
 #include "progress.h"
 #include <stdio.h>
+#include <string.h>
 #include <sys/ioctl.h>
 
 void printHelp() {
@@ -34,28 +35,68 @@ int calcColWidth(int percentage) {
 void printCompleted(packageInfo *package) {
   printf("\x1B[K"); // Clear line
   printf(GREEN "%-*s"
-               " %*s\n",
-         calcColWidth(63), package->packageName, calcColWidth(20),
+               "%s\n",
+         calcColWidth(60), package->packageName,
          RED "::" WHITE " Download Completed!!");
-}
-
-void printTotal(packageInfo *totalInfo) {
-  printf(GREEN "%-*s" WHITE " %*s/s ", calcColWidth(50), totalInfo->packageName,
-         calcColWidth(10), totalInfo->speed);
 }
 
 void printDownloadInfo(packageInfo *package) {
   // printf("\x1B[K"); // Clear line
   if (package->packageName != NULL && package->speed != NULL &&
       package->downloaded != NULL && package->totalSize != NULL) {
-    printf(GREEN "%-*s" WHITE " %*s/s ", calcColWidth(50), package->packageName,
-           calcColWidth(10), package->speed);
-    printf(GREEN);
-    printProgress(package->progress, calcColWidth(35));
-    printf(WHITE "%3d%%\n", package->progress);
+
+    if (getTerminalWidth() >= 110) {
+      printf(GREEN "%-*s" WHITE, calcColWidth(43), package->packageName);
+      printf("%*s ", calcColWidth(8) - 1, package->downloaded);
+      printf("%*s/s ", calcColWidth(10) - 3, package->speed);
+      printf(GREEN);
+      printProgress(package->progress, calcColWidth(39) - 4);
+      printf(WHITE "%3d%%\n", package->progress);
+    } else {
+      printf(GREEN "%-*s" WHITE, calcColWidth(30), package->packageName);
+      printf("%*s ", calcColWidth(14) - 1, package->downloaded);
+      printf("%*s/s ", calcColWidth(17) - 3, package->speed);
+      printf(GREEN);
+      printProgress(package->progress, calcColWidth(39) - 4);
+      printf(WHITE "%3d%%\n", package->progress);
+    }
   } else {
     puts("");
   }
+}
+
+void printTotalStats(char *totalDownloaded, char *totalSpeed) {
+  printf(GREEN);
+  printProgress(100, 2);
+  printf(RED " %s " WHITE, "Stats");
+  printf(GREEN);
+  if (getTerminalWidth() >= 110) {
+    printProgress(100, calcColWidth(43) - strlen("Stats") - 2 - 2);
+    printProgress(100, calcColWidth(8) - strlen(totalDownloaded) - 2);
+    printf(RED " %s " GREEN, totalDownloaded);
+    int sep = calcColWidth(9) - strlen(totalSpeed) - 1;
+    printProgress(100, sep);
+    if (sep < 1)
+      printf(RED "%s " WHITE, totalSpeed);
+    else
+      printf(RED " %s " WHITE, totalSpeed);
+    printf(GREEN);
+    printProgress(100, calcColWidth(40) - 1);
+  } else {
+    printProgress(100, calcColWidth(30) - strlen("Stats") - 2 - 2);
+    printProgress(100, calcColWidth(14) - strlen(totalDownloaded) - 2);
+    printf(RED " %s " GREEN, totalDownloaded);
+    int sep = calcColWidth(17) - strlen(totalSpeed) - 1;
+    printProgress(100, sep);
+    if (sep < 1)
+      printf(RED "%s " WHITE, totalSpeed);
+    else
+      printf(RED " %s " WHITE, totalSpeed);
+    printf(GREEN);
+    printProgress(100, calcColWidth(39) - 1);
+  }
+
+  printf("\n");
 }
 
 void printDetails(packageInfoList *packageList) {
