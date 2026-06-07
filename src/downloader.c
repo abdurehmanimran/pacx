@@ -129,17 +129,17 @@ void downloadPackage(packageInfo *packageInformation) {
         // Reading the stdout of the child process
         close(processPipe[1]); // We dont want to write to the pipe
         char buffer[512];
-        FILE *log = openLogFile(packageInformation);
+        // FILE *log = openLogFile(packageInformation);
 
         while ((read(processPipe[0], buffer, sizeof(buffer))) != 0) {
-          fprintf(log, "%s\n", buffer);
+          // fprintf(log, "%s\n", buffer);
           buffer[strcspn(buffer, "\n")] = '\0';
           char info[strlen(buffer) + 1];
           strncpy(info, buffer, strlen(buffer) + 1);
           getDetails(info, &packageInformation);
         }
         packageInformation->progress = 100;
-        fclose(log);
+        // fclose(log);
       } else {
         printf("Error while downloading the package: %s\n",
                packageInformation->packageName);
