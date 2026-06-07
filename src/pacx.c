@@ -90,7 +90,7 @@ void chooseUnit(double amount, char *buffer) {
 }
 
 void calcTotalSpeed(packageInfoList *packageList, char **totalSpeed,
-                    char **totalDownloaded) {
+                    char **totalDownloaded, double prevDownloaded) {
   double speedInMBs = 0;
   double downloadedInMBs = 0;
 
@@ -103,6 +103,8 @@ void calcTotalSpeed(packageInfoList *packageList, char **totalSpeed,
 
     addAmount(packageList->packages[i]->speed, &speedInMBs);
   }
+
+  downloadedInMBs += prevDownloaded;
 
   char partialSpeed[24], partialDownloaded[24];
   chooseUnit(speedInMBs, partialSpeed);
@@ -119,6 +121,7 @@ void calcTotalSpeed(packageInfoList *packageList, char **totalSpeed,
 
 void fetchPackages(packageInfoList *packageList) {
   pthread_t *threads;
+  double completedDownloaded = 0;
 
   packageInfoList packagesDownloading;
   initPackageList(&packagesDownloading);
@@ -141,6 +144,8 @@ void fetchPackages(packageInfoList *packageList) {
       if (packagesDownloading.packages[i]->progress == 100 ||
           packagesDownloading.packages[i]->notFinished == 0) {
         printCompleted(packagesDownloading.packages[i]);
+        addAmount(packagesDownloading.packages[i]->downloaded,
+                  &completedDownloaded);
         popPackage(&packagesDownloading, packagesDownloading.packages[i]);
         if (index < packageList->n) {
           insertPackage(&packagesDownloading, packageList->packages[index++]);
@@ -163,7 +168,8 @@ void fetchPackages(packageInfoList *packageList) {
     }
 
     char *totalSpeed, *totalDownloaded;
-    calcTotalSpeed(packageList, &totalSpeed, &totalDownloaded);
+    calcTotalSpeed(packageList, &totalSpeed, &totalDownloaded,
+                   completedDownloaded);
     printTotalStats(totalDownloaded, totalSpeed);
 
     MOVE_N_LINES_UP(packagesDownloading.n + 1);
