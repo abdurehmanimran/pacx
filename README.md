@@ -3,7 +3,13 @@ A simple blazing-fast Pacman wrapper inspired by **Powerpill** and **Nala** that
 
 This lightweight wrapper brings the speed of parallel downloads to your Arch Linux system using `aria2c`, while keeping things simple and elegant and having a beautiful and intuitive interface inspired by **Nala**
 
-## Compilation
+## Installation
+The package can be directly installed through any AUR helper:
+```
+yay -S pacx
+```
+
+## Building from Source
 To compile the project from source code, clone the repository and run `make`. The binary will be inside the **bin** directory.
 
 ```
@@ -11,16 +17,13 @@ git clone https://github.com/abdurehmanimran/pacx.git
 cd pacx
 make
 ```
-or optimized builds:
+For optimized builds, use `build-release` instead of `build`.
 ```
 make build-release
 ```
-
-## Installation
 The binary can be installed as:
 
 ```
-make build-release
 sudo make install
 ```
 
@@ -36,6 +39,6 @@ sudo make install
 Just so that I could learn and practice C.
 
 ## Credit
-- `aria2c` for making ultra-fast downloads of packages possible.
+- `aria2` for making ultra-fast downloads of packages possible.
 - `pacman` for the solid foundation.
 - `powerpill` and `nala` for inspiring the beautiful and elegant design.
