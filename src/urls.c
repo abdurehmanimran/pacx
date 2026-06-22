@@ -1,41 +1,59 @@
 #include "urls.h"
 #include "colors.h"
+#include "str.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
 packageURL getPackageURL(char *package, int ignoreDependencies) {
   FILE *process;
-  char urls[5024];
-  char command[128];
+  // char urls[5024];
+  String *urls;
+  allocString(&urls, 5124);
+  // char command[128];
+  String *command;
 
   if (package != NULL) { // When package name is provided
-    if (ignoreDependencies)
-      strcpy(command, "pacman -Sddp ");
-    else
-      strcpy(command, "pacman -Sp ");
-    strcat(command, package);
+    command = createString("pacman -Sddp ");
+    stringAppend(&command, package);
+    // strcpy(command, "pacman -Sddp ");
+    // strcat(command, package);
   } else {
     printf(RED "Error: " WHITE "Package Name is NULL!!");
     exit(1);
   }
 
-  if ((process = popen(command, "r")) == NULL) {
+  if ((process = popen(command->str, "r")) == NULL) {
     printf("Failed to get URL");
     exit(1);
   }
-  char buffer[1024];
 
-  if ((fgets(buffer, 1024, process) == NULL)) {
+  char buffer[1025];
+  memset(buffer, 0, sizeof(buffer));
+
+  long unsigned int bytes =
+      fread(buffer, sizeof(char), sizeof(buffer) - 1, process);
+
+  if (bytes == 0) {
     printf(RED "Error:" WHITE " No URL found for the package: %s\n", package);
     exit(1);
-  } else {
-    strcpy(urls, buffer);
   }
 
-  while (fgets(buffer, 1024, process) != NULL) {
-    strcat(urls, buffer);
+  while (bytes > 0) {
+    stringAppend(&urls, buffer);
+    // strcat(urls, buffer);
+
+    if (bytes < sizeof(buffer) - 1) {
+      if (feof(process))
+        break;
+    }
+
+    memset(buffer, 0, sizeof(buffer));
+    bytes = fread(buffer, sizeof(char), sizeof(buffer) - 1, process);
   }
-  urls[strcspn(urls, "\0") - 1] = '\0';
-  return (packageURL)strdup(urls);
+  char *returnUrls = strdup(urls->str);
+  freeString(urls);
+  returnUrls[strcspn(returnUrls, "\0") - 1] = '\0';
+
+  return (packageURL)returnUrls;
 }

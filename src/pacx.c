@@ -7,6 +7,7 @@
 #include "packageinfo.h"
 #include "packagelist.h"
 #include "print.h"
+#include "str.h"
 #include "urls.h"
 #include <pthread.h>
 #include <stdio.h>
@@ -181,41 +182,66 @@ void fetchPackages(packageInfoList *packageList) {
   free(threads);
 }
 
-void getArgumentPackages(char *buffer) {
+void getArgumentPackages(String **buffer) {
+  allocString(buffer, 1024);
   currentArg++;
 
-  strcpy(buffer, arguments[currentArg]);
-  strcat(buffer, " ");
+  stringAppend(buffer, arguments[currentArg]);
+  stringAppend(buffer, " ");
   currentArg++;
 
   while (currentArg < totalArgs) {
-    strcat(buffer, arguments[currentArg++]);
-    strcat(buffer, " ");
+    stringAppend(buffer, arguments[currentArg++]);
+    stringAppend(buffer, " ");
   }
 }
 
 // Returns a malloced list of packages each on a separate line
 char *getPackageNames(int toUpdate) {
-  char command[2056];
+  String *command;
+  String *argumentPackages;
+
   if (toUpdate)
-    strcpy(command, "pacman -Su --print-format %n");
+    command = createString("pacman -Su --print-format %n");
   else {
-    strcpy(command, "pacman -S ");
-    char argumentPackages[1024];
-    getArgumentPackages(argumentPackages);
-    strcat(command, argumentPackages);
-    strcat(command, " --print-format %n");
+    command = createString("pacman -S ");
+
+    getArgumentPackages(&argumentPackages);
+    stringCat(&command, argumentPackages);
+    stringAppend(&command, " --print-format %n");
   }
 
   FILE *process;
-  char packageNames[5120];
+  // char packageNames[5120];
+  String *packageNames = createString("");
   char buffer[1024];
+  memset(buffer, 0, sizeof(buffer));
 
-  if ((process = popen(command, "r")) == NULL) {
+  if ((process = popen(command->str, "r")) == NULL) {
     puts(GREEN "Error:" WHITE " Failed to run pacman!!");
     exit(1);
   }
 
+  long unsigned int bytes =
+      fread(buffer, sizeof(char), sizeof(buffer), process);
+
+  if (bytes == 0) {
+    puts(GREEN "Alert:" WHITE " Nothing to do!!");
+    exit(0);
+  }
+
+  while (bytes > 0) {
+    stringAppend(&packageNames, buffer);
+
+    if (bytes < sizeof(buffer)) {
+      if (feof(process))
+        break;
+    }
+    memset(buffer, 0, sizeof(buffer));
+    bytes = fread(buffer, sizeof(char), sizeof(buffer), process);
+  }
+
+  /*
   if ((fgets(buffer, 1024, process) == NULL)) {
     // i.e Pacman executed without any output
     puts(GREEN "Alert:" WHITE " Nothing to do!!");
@@ -227,8 +253,16 @@ char *getPackageNames(int toUpdate) {
   while (fgets(buffer, 1024, process) != NULL) {
     strcat(packageNames, buffer);
   }
-
   return strdup(packageNames);
+  */
+
+  char *returnStr = strdup(packageNames->str);
+
+  freeString(command);
+  freeString(argumentPackages);
+  freeString(packageNames);
+
+  return returnStr;
 }
 
 void createPackageList(packageInfoList *packageList, int toUpdate) {
@@ -245,10 +279,14 @@ void createPackageList(packageInfoList *packageList, int toUpdate) {
   // and Insert them into packageInfoList
   while (packageName != NULL) {
     packageInfo *package;
-    initPackageInfo(&package, packageName, getPackageURL(packageName, 1));
+
+    // initPackageInfo(&package, packageName, getPackageURL(packageName, 1));
+    initPackageInfo(&package, packageName, NULL);
     insertPackage(packageList, package);
     packageName = strtok(NULL, "\n"); // Get the next packageName
   }
+
+  free(packageNames);
 }
 
 void execute(char **args) {
@@ -272,14 +310,16 @@ void syncPackages() {
   char *mvArgs[] = {"sh", "-c",
                     "mv /usr/share/pacx/cache/* /var/cache/pacman/pkg/", NULL};
   execute(mvArgs);
-  printf(GREEN " ::" WHITE " Successfully moved" GREEN "%d" WHITE " packages!!",
+  printf(GREEN " ::" WHITE " Successfully " GREEN "moved " RED "%d" WHITE
+               " packages!!\n",
          packageList.n);
   // Freeing the packageList
   freePackageList(&packageList);
 
-  char argumentPackages[1024];
+  // char argumentPackages[1024];
+  String *argumentPackages;
   currentArg = 1;
-  getArgumentPackages(argumentPackages);
+  getArgumentPackages(&argumentPackages);
 
   int packages = totalArgs - 2;
 
@@ -288,7 +328,7 @@ void syncPackages() {
   pacmanArgs[1] = "-S";
   pacmanArgs[packages + 2] = NULL;
 
-  char *package = strtok(argumentPackages, " ");
+  char *package = strtok(argumentPackages->str, " ");
   if (package != NULL)
     pacmanArgs[2] = package;
 
@@ -313,7 +353,8 @@ void updatePackages() {
   char *mvArgs[] = {"sh", "-c",
                     "mv /usr/share/pacx/cache/* /var/cache/pacman/pkg/", NULL};
   execute(mvArgs);
-  printf(GREEN " ::" WHITE " Successfully moved" GREEN "%d" WHITE " packages!!",
+  printf(GREEN " ::" WHITE " Successfully moved" GREEN "%d" WHITE
+               " packages!!\n",
          packageList.n);
 
   // Free the malloced packages part of packaageList
