@@ -1,6 +1,8 @@
 #ifndef STR_H
 #define STR_H
 
+#include <stdio.h>
+
 typedef struct {
   unsigned int size;
   unsigned int capacity;
@@ -17,5 +19,7 @@ String *createString(char *str);
 
 void stringAppend(String **dest, char *srcStr);
 void stringCat(String **dest, String *src);
+
+String *getOutput(FILE *stream);
 
 #endif // !STR_H

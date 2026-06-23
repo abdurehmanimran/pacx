@@ -86,7 +86,7 @@ void replaceNewLineChar(char *string, char new) {
 }
 
 void downloadPackage(packageInfo *packageInformation) {
-  char *url = getPackageURL(packageInformation->packageName, 1);
+  char *url = getPackageURL(packageInformation->packageName);
   // puts(url);
   // replaceNewLineChar(url, ' ');
   if (url != NULL) {

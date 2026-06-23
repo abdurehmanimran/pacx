@@ -3,6 +3,6 @@
 
 typedef char *packageURL;
 
-packageURL getPackageURL(char *package, int ignoreDependencies);
+packageURL getPackageURL(char *package);
 
 #endif // URLS_H

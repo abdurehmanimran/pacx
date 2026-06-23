@@ -6,13 +6,13 @@ typedef struct {
   char *downloaded;
   char *totalSize;
   char *speed;
-  char *url;
+  //  char *url; // getUrl func moved to downloader
   int progress;
   int notFinished;
   int downloadStarted;
 } packageInfo;
 
-void initPackageInfo(packageInfo **package, char *name, char *url);
+void initPackageInfo(packageInfo **package, char *name);
 void freePackageInfo(packageInfo **package);
 void changePackageInfo(packageInfo *package, int opt, char *newValue);
 

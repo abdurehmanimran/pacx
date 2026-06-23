@@ -66,6 +66,30 @@ void stringCat(String **dest, String *src) {
   (*dest)->str[index] = 0;
 }
 
+String *getOutput(FILE *stream) {
+  String *output;
+  allocString(&output, 2128);
+
+  char buffer[1025];
+  memset(buffer, 0, sizeof(buffer));
+
+  long unsigned int bytes =
+      fread(buffer, sizeof(char), sizeof(buffer) - 1, stream);
+
+  if (bytes == 0) {
+    return NULL;
+  }
+
+  while (bytes > 0) {
+    stringAppend(&output, buffer);
+
+    memset(buffer, 0, sizeof(buffer));
+    bytes = fread(buffer, sizeof(char), sizeof(buffer) - 1, stream);
+  }
+
+  return output;
+}
+
 void freeString(String *ptr) {
   if (ptr) {
     if (ptr->str)
