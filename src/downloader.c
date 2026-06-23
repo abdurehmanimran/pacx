@@ -3,9 +3,11 @@
 #include "packagelist.h"
 #include "urls.h"
 #include <pthread.h>
+#include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 FILE *openLogFile(packageInfo *package) {
@@ -25,7 +27,7 @@ void getDetails(char *summary, packageInfo **package) {
     while (token != NULL) {
       // Fetching the size that has been downloaded
       if (strstr(token, "%)") != NULL) {
-        // Getting the size of package that has been downloaded
+        // Getting the size of package that has been downloadedownlad
         char downloaded[64];
         strcpy(downloaded, token);
         // char *downloaded = strdup(token);
@@ -140,7 +142,13 @@ void downloadPackage(packageInfo *packageInformation) {
           strncpy(info, buffer, strlen(buffer) + 1);
           getDetails(info, &packageInformation);
         }
+
+        kill(processPID, SIGKILL);
+        int status;
+        waitpid(processPID, &status, 0);
+
         packageInformation->progress = 100;
+        free(url);
         // fclose(log);
       } else {
         printf("Error while downloading the package: %s\n",
