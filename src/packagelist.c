@@ -17,7 +17,7 @@ int insertPackage(packageInfoList *packageList, packageInfo *package) {
   packageList->n++;
 
   if (packageList->capacity < packageList->n) {
-    packageList->capacity += 4;
+    packageList->capacity += 128;
     packageInfo **tempPtr = realloc(
         packageList->packages, (sizeof(packageInfo *) * packageList->capacity));
     if (tempPtr != NULL) {

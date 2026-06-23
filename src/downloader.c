@@ -1,6 +1,7 @@
 #include "downloader.h"
 #include "packageinfo.h"
 #include "packagelist.h"
+#include "urls.h"
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -85,7 +86,8 @@ void replaceNewLineChar(char *string, char new) {
 }
 
 void downloadPackage(packageInfo *packageInformation) {
-  char *url = packageInformation->url;
+  char *url = getPackageURL(packageInformation->packageName);
+  // puts(url);
   // replaceNewLineChar(url, ' ');
   if (url != NULL) {
 
@@ -151,12 +153,12 @@ void downloadPackage(packageInfo *packageInformation) {
 void *startDownload(void *arg) {
   ((packageInfo *)arg)->downloadStarted = 1;
   downloadPackage((packageInfo *)arg);
-  FILE *log = openLogFile((packageInfo *)arg);
-  fprintf(log, "Progress: %d\n", ((packageInfo *)arg)->progress);
+  // FILE *log = openLogFile((packageInfo *)arg);
+  // fprintf(log, "Progress: %d\n", ((packageInfo *)arg)->progress);
 
   ((packageInfo *)arg)->notFinished = 0;
   // ((packageInfo *)arg)->progress = 100;
-  fclose(log);
+  // fclose(log);
   pthread_exit(NULL);
   return NULL;
 }

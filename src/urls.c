@@ -1,41 +1,38 @@
 #include "urls.h"
 #include "colors.h"
+#include "str.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 
-packageURL getPackageURL(char *package, int ignoreDependencies) {
+packageURL getPackageURL(char *package) {
   FILE *process;
-  char urls[5024];
-  char command[128];
+  String *urls; // getOutput allocates memory itself
+  String *command;
 
   if (package != NULL) { // When package name is provided
-    if (ignoreDependencies)
-      strcpy(command, "pacman -Sddp ");
-    else
-      strcpy(command, "pacman -Sp ");
-    strcat(command, package);
+    command = createString("pacman -Sddp ");
+    stringAppend(&command, package);
   } else {
     printf(RED "Error: " WHITE "Package Name is NULL!!");
     exit(1);
   }
 
-  if ((process = popen(command, "r")) == NULL) {
+  if ((process = popen(command->str, "r")) == NULL) {
     printf("Failed to get URL");
     exit(1);
   }
-  char buffer[1024];
 
-  if ((fgets(buffer, 1024, process) == NULL)) {
+  if ((urls = getOutput(process)) == NULL) {
     printf(RED "Error:" WHITE " No URL found for the package: %s\n", package);
     exit(1);
-  } else {
-    strcpy(urls, buffer);
   }
+  pclose(process);
 
-  while (fgets(buffer, 1024, process) != NULL) {
-    strcat(urls, buffer);
-  }
-  urls[strcspn(urls, "\0") - 1] = '\0';
-  return (packageURL)strdup(urls);
+  char *returnUrls = strdup(urls->str);
+  freeString(urls);
+  returnUrls[strcspn(returnUrls, "\0") - 1] = '\0';
+
+  return (packageURL)returnUrls;
 }
