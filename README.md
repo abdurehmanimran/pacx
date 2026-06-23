@@ -28,12 +28,9 @@ sudo make install
 ```
 
 ## See It In Action
+<img width="1908" height="1022" alt="image" src="https://github.com/user-attachments/assets/35b55460-4c3b-4db9-8a4e-dd6f9b1a469c" />
 
-<img width="1908" height="1022" alt="image" src="https://github.com/user-attachments/assets/1b18e5da-5083-495b-aa08-ef676d6ba71b" />
-
-
-<img width="1908" height="1022" alt="image" src="https://github.com/user-attachments/assets/46330bb5-e4af-4694-a24f-72eae1d8b1d0" />
-
+<img width="1908" height="1022" alt="image" src="https://github.com/user-attachments/assets/3383b1fc-624e-4644-b495-1cd38be3472b" />
 
 ## Why C?
 Just so that I could learn and practice C.
