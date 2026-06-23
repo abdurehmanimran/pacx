@@ -31,6 +31,7 @@ packageURL getPackageURL(char *package) {
   pclose(process);
 
   char *returnUrls = strdup(urls->str);
+  freeString(command);
   freeString(urls);
   returnUrls[strcspn(returnUrls, "\0") - 1] = '\0';
 
