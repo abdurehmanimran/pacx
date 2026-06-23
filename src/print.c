@@ -53,7 +53,7 @@ void printDownloadInfo(packageInfo *package) {
 
     if (getTerminalWidth() >= 110) { // For Normal Terminal Widths
       printf(GREEN "%-*.*s" WHITE "%*.*s%*.*s/s ", calcColWidth(43),
-             calcColWidth(43) - 2, package->packageName, calcColWidth(8),
+             calcColWidth(43), package->packageName, calcColWidth(8),
              calcColWidth(8), package->downloaded, calcColWidth(10) - 3,
              calcColWidth(10) - 4, package->speed);
       printf(GREEN);
@@ -80,10 +80,10 @@ void printTotalStats(char *totalDownloaded, char *totalSpeed) {
   printf(RED " %s " WHITE, "Stats");
   printf(GREEN);
   if (getTerminalWidth() >= 110) {
-    printProgress(100, calcColWidth(43) - strlen("Stats") - 2 - 2);
+    printProgress(100, calcColWidth(43) - strlen("Stats") - 2 - 1);
     printProgress(100, calcColWidth(8) - strlen(totalDownloaded) - 2);
     printf(RED " %s " GREEN, totalDownloaded);
-    int sep = calcColWidth(9) - strlen(totalSpeed) - 1;
+    int sep = calcColWidth(9) - strlen(totalSpeed) - 2;
     printProgress(100, sep);
     if (sep < 1)
       printf(RED "%s " WHITE, totalSpeed);
