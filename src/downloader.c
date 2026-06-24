@@ -17,66 +17,48 @@ FILE *openLogFile(packageInfo *package) {
   return fopen(logFile, "a");
 }
 
-void getDetails(char *summary, packageInfo **package) {
-  // Sample Summary: [#243f8f 96KiB/142MiB(0%) CN:1 DL:506KiB ETA:4m48s]
+void parseDetails(char *summary, packageInfo *package) {
+  if (strstr(summary, "ETA:") == NULL)
+    return;
 
   char *whitespace_ptr;
+  char *token = strtok_r(summary, " ", &whitespace_ptr);
 
-  if (strcspn(summary, "[") == 0) {
-    char *token = strtok_r(summary, " ", &whitespace_ptr);
-    while (token != NULL) {
-      // Fetching the size that has been downloaded
-      if (strstr(token, "%)") != NULL) {
-        // Getting the size of package that has been downloadedownlad
-        char downloaded[64];
-        strcpy(downloaded, token);
-        // char *downloaded = strdup(token);
-        downloaded[strcspn(downloaded, "B/") + 1] = '\0';
-        changePackageInfo(*package, 1, strdup(downloaded));
+  // Second Part of Summary
+  if (token != NULL) {
+    token = strtok_r(NULL, " ", &whitespace_ptr);
+    if (token == NULL)
+      return;
 
-        // Getting the total size of the package
-        char nextToken[64];
-        char *totalToken;
-        strcpy(nextToken, token);
-        char *totalPtr;
-        totalToken = strtok_r(nextToken, "/", &totalPtr);
-        if (totalToken != NULL) {
-          totalToken = strtok_r(NULL, "/", &totalPtr);
-        }
-        if (totalToken != NULL) {
-          totalToken[strcspn(totalToken, "(")] = '\0';
-          changePackageInfo(*package, 2, strdup(totalToken));
-        }
-        // Getting the download progress for the package
-        char *progressTok;
-        char *progressString = strtok_r(token, "(", &progressTok);
-        progressString = strtok_r(NULL, "(", &progressTok);
-        if (progressString != NULL)
-          (*package)->progress = atoi(progressString);
-        else
-          (*package)->progress = 0;
-      }
-      // Getting the speed part from aria2c
+    char *slashPtr;
+    char *subToken = strtok_r(token, "/", &slashPtr);
+    if (subToken != NULL)
+      package->downloaded = strdup(subToken);
+    subToken = strtok_r(NULL, "/", &slashPtr);
 
-      if (strcspn(token, "DL:") == 0) {
-        char retoken[strlen(token)];
-        int j = 0;
-        for (size_t i = 3; i < strlen(token); i++) {
-          retoken[j++] = token[i];
-        }
-        retoken[strcspn(retoken, "B") + 1] = '\0';
-        if (strcmp("nload", retoken) == 0 || strcmp("nload{", retoken) == 0)
-          changePackageInfo(*package, 3, strdup("0B"));
-        // (*package)->speed = strdup("0B");
-        else
-          changePackageInfo(*package, 3, strdup(retoken));
-        // (*package)->speed = strdup(retoken);
-        break;
-      }
-      // else if (strcspn(token, ""))
-      token = strtok_r(NULL, " ", &whitespace_ptr);
+    if (subToken != NULL) {
+      char *paranthesisPtr;
+      char *smallerSubToken = strtok_r(subToken, "(", &paranthesisPtr);
+
+      if (smallerSubToken != NULL)
+        package->totalSize = strdup(smallerSubToken);
+
+      smallerSubToken = strtok_r(NULL, "(", &paranthesisPtr);
+
+      if (smallerSubToken != NULL)
+        package->progress = atoi(smallerSubToken);
     }
   }
+
+  // DN: ____ Part
+  token = strtok_r(NULL, " ", &whitespace_ptr);
+  if (token != NULL)
+    token = strtok_r(NULL, " ", &whitespace_ptr);
+
+  for (; *(token - 1) != ':'; token++)
+    ;
+
+  package->speed = strdup(token);
 }
 
 void replaceNewLineChar(char *string, char new) {
@@ -89,12 +71,9 @@ void replaceNewLineChar(char *string, char new) {
 
 void downloadPackage(packageInfo *packageInformation) {
   char *url = getPackageURL(packageInformation->packageName);
-  // puts(url);
-  // replaceNewLineChar(url, ' ');
-  if (url != NULL) {
 
+  if (url != NULL) {
     if (strcspn(url, "file") == 0) {
-      // changePackageInfo(packageInformation, 4, strdup("100%"));
       packageInformation->progress = 100;
       packageInformation->notFinished = 0;
     } else {
@@ -111,7 +90,6 @@ void downloadPackage(packageInfo *packageInformation) {
         close(processPipe[1]);
 
         // Executing aria2c
-
         char *args[] = {"aria2c",
                         "--continue",
                         "--optimize-concurrent-downloads",
@@ -128,19 +106,17 @@ void downloadPackage(packageInfo *packageInformation) {
                         DOWNLOAD_DIRECTORY,
                         NULL};
         execvp(args[0], args);
-      } else if (processPID > 0) {
-        // Parent Process
+      } else if (processPID > 0) { // Parent Process
         // Reading the stdout of the child process
         close(processPipe[1]); // We dont want to write to the pipe
         char buffer[512];
-        // FILE *log = openLogFile(packageInformation);
 
         while ((read(processPipe[0], buffer, sizeof(buffer))) != 0) {
-          // fprintf(log, "%s\n", buffer);
           buffer[strcspn(buffer, "\n")] = '\0';
           char info[strlen(buffer) + 1];
           strncpy(info, buffer, strlen(buffer) + 1);
-          getDetails(info, &packageInformation);
+          parseDetails(info, packageInformation);
+          // getDetails(info, &packageInformation);
         }
 
         kill(processPID, SIGKILL);
@@ -149,7 +125,6 @@ void downloadPackage(packageInfo *packageInformation) {
 
         packageInformation->progress = 100;
         free(url);
-        // fclose(log);
       } else {
         printf("Error while downloading the package: %s\n",
                packageInformation->packageName);
@@ -161,12 +136,7 @@ void downloadPackage(packageInfo *packageInformation) {
 void *startDownload(void *arg) {
   ((packageInfo *)arg)->downloadStarted = 1;
   downloadPackage((packageInfo *)arg);
-  // FILE *log = openLogFile((packageInfo *)arg);
-  // fprintf(log, "Progress: %d\n", ((packageInfo *)arg)->progress);
-
   ((packageInfo *)arg)->notFinished = 0;
-  // ((packageInfo *)arg)->progress = 100;
-  // fclose(log);
   pthread_exit(NULL);
   return NULL;
 }

@@ -9,7 +9,7 @@
 // Directory in which the downloaded packages will be placed
 #define DOWNLOAD_DIRECTORY "/usr/share/pacx/cache/"
 
-void getDetails(char *summary, packageInfo **package);
+void parseDetails(char *summary, packageInfo *package);
 void downloadPackage(packageInfo *packageInformation);
 void *startDownload(void *arg);
 void createDownloadThreads(pthread_t **threads, packageInfoList *packageList);
