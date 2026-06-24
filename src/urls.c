@@ -33,7 +33,7 @@ packageURL getPackageURL(char *package) {
   char *returnUrls = strdup(urls->str);
   freeString(command);
   freeString(urls);
-  returnUrls[strcspn(returnUrls, "\0") - 1] = '\0';
+  returnUrls[strcspn(returnUrls, "\n")] = '\0';
 
   return (packageURL)returnUrls;
 }
