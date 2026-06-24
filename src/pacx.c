@@ -71,7 +71,7 @@ void addAmount(const char *amount, double *total) {
     *total += atof(amount) / (1024.0 * 1024.0);
 }
 
-void chooseUnit(double amount, char *buffer) {
+void chooseUnit(double amount, String **buffer) {
   char tempBuffer[24];
 
   if (amount >= 1000) {
@@ -86,11 +86,11 @@ void chooseUnit(double amount, char *buffer) {
   } else
     snprintf(tempBuffer, sizeof(tempBuffer), "%.1fMiB", amount);
 
-  strcpy(buffer, tempBuffer);
+  *buffer = createString(tempBuffer);
 }
 
-void calcTotalSpeed(packageInfoList *packageList, char **totalSpeed,
-                    char **totalDownloaded, double prevDownloaded) {
+void calcTotalSpeed(packageInfoList *packageList, String **totalSpeed,
+                    String **totalDownloaded, double prevDownloaded) {
   double speedInMBs = 0;
   double downloadedInMBs = 0;
 
@@ -106,17 +106,9 @@ void calcTotalSpeed(packageInfoList *packageList, char **totalSpeed,
 
   downloadedInMBs += prevDownloaded;
 
-  char partialSpeed[24], partialDownloaded[24];
-  chooseUnit(speedInMBs, partialSpeed);
-  chooseUnit(downloadedInMBs, partialDownloaded);
-
-  *totalDownloaded =
-      (char *)malloc(sizeof(char) * (strlen(partialDownloaded) + 1));
-  strcpy(*totalDownloaded, partialDownloaded);
-
-  strcat(partialSpeed, "/s");
-  *totalSpeed = (char *)malloc(sizeof(char) * (strlen(partialSpeed) + 1));
-  strcpy(*totalSpeed, partialSpeed);
+  chooseUnit(speedInMBs, totalSpeed);
+  stringAppend(totalSpeed, "/s");
+  chooseUnit(downloadedInMBs, totalDownloaded);
 }
 
 void fetchPackages(packageInfoList *packageList) {
@@ -167,10 +159,11 @@ void fetchPackages(packageInfoList *packageList) {
       printDownloadInfo(packagesDownloading.packages[i]);
     }
 
-    char *totalSpeed, *totalDownloaded;
+    String *totalSpeed;
+    String *totalDownloaded;
     calcTotalSpeed(packageList, &totalSpeed, &totalDownloaded,
                    completedDownloaded);
-    printTotalStats(totalDownloaded, totalSpeed);
+    printTotalStats(totalDownloaded->str, totalSpeed->str);
 
     MOVE_N_LINES_UP(packagesDownloading.n + 1);
 
