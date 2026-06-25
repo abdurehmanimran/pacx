@@ -62,14 +62,6 @@ void parseDetails(char *summary, packageInfo *package) {
   package->speed = strdup(token);
 }
 
-void replaceNewLineChar(char *string, char new) {
-  int len = strlen(string);
-  for (int i = 0; i < len; i++) {
-    if (string[i] == '\n')
-      string[i] = new;
-  }
-}
-
 void downloadPackage(packageInfo *packageInformation) {
   char *url = getPackageURL(packageInformation->packageName);
 

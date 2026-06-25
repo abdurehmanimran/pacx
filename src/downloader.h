@@ -12,7 +12,5 @@
 void parseDetails(char *summary, packageInfo *package);
 void downloadPackage(packageInfo *packageInformation);
 void *startDownload(void *arg);
-void createDownloadThreads(pthread_t **threads, packageInfoList *packageList);
-void waitForDownloadThreads(pthread_t **threads, packageInfoList *packageList);
 
 #endif // !DOWNLOADER_H
