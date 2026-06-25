@@ -55,8 +55,9 @@ void parseDetails(char *summary, packageInfo *package) {
   if (token != NULL)
     token = strtok_r(NULL, " ", &whitespace_ptr);
 
-  for (; *(token - 1) != ':'; token++)
-    ;
+  while (*token != ':')
+    token++;
+  token++;
 
   package->speed = strdup(token);
 }
