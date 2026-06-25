@@ -4,11 +4,13 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define INIT_LIST_CAP 56
+
 void initPackageList(packageInfoList *packageList) {
   packageList->n = 0;
   packageList->capacity = 1;
-  packageList->packages = (packageInfo **)malloc(sizeof(
-      packageInfo *)); // Allocating memory for at least one ptr to packageInfo
+  packageList->packages =
+      (packageInfo **)malloc(sizeof(packageInfo *) * INIT_LIST_CAP);
   if (packageList->packages == NULL)
     puts("Error: Failed to allocate memory for packageList");
 }
@@ -24,6 +26,7 @@ int insertPackage(packageInfoList *packageList, packageInfo *package) {
       packageList->packages = tempPtr;
     } else {
       puts("Error: Failed to expand the packageList");
+      return -1;
     }
   }
 
@@ -34,8 +37,11 @@ int insertPackage(packageInfoList *packageList, packageInfo *package) {
 void popPackage(packageInfoList *packageList, packageInfo *package) {
   int index = 0;
   while (strcmp(packageList->packages[index]->packageName,
-                package->packageName) != 0)
+                package->packageName) != 0) {
     index++;
+    if (index >= packageList->n)
+      return; // Given package was not found in the list
+  }
 
   for (int i = index; i < packageList->n - 1; i++) {
     packageList->packages[i] = packageList->packages[i + 1];
