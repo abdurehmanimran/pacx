@@ -7,5 +7,6 @@
 #define CYAN "\x1b[36m"
 #define GREEN "\x1b[38:5:2m"
 #define WHITE "\x1b[0m"
+#define BLACK "\x1b[30m"
 
 #endif
