@@ -15,3 +15,8 @@ install:
 	mkdir /usr/share/pacx/cache -p
 	mkdir /usr/share/pacx/log -p
 	cp bin/release/pacx /usr/bin/pacx
+
+install-debug:
+	mkdir /usr/share/pacx/cache -p
+	mkdir /usr/share/pacx/log -p
+	cp bin/pacx /usr/bin/pacx
