@@ -14,6 +14,8 @@
 #include <string.h>
 #include <unistd.h>
 
+#define PARALLEL_DOWNLOADS 20
+
 Argument args[] = {
     {"-h", printHelp},    {"--help", printHelp},    {"-S", syncPackages},
     {"-s", syncPackages}, {"--sync", syncPackages}, {"-Su", updatePackages},
@@ -57,8 +59,6 @@ int main(int argc, char **argv) {
   return 0;
 }
 
-#define PARALLEL_DOWNLOADS 20
-
 void addAmount(const char *amount, double *total) {
 
   if (strstr(amount, "G"))
@@ -73,19 +73,21 @@ void addAmount(const char *amount, double *total) {
 
 void chooseUnit(double amount, String **buffer) {
   char tempBuffer[24];
+  char *format;
 
   if (amount >= 1000) {
     amount /= 1024;
-    snprintf(tempBuffer, sizeof(tempBuffer), "%.1fGiB", amount);
+    format = ((int)amount == amount) ? "%.0fGiB" : "%.1fGiB";
   } else if (amount * 1024 <= 1) {
     amount *= 1024 * 1024;
-    snprintf(tempBuffer, sizeof(tempBuffer), "%.1fB", amount);
+    format = ((int)amount == amount) ? "%0.fB" : "%.1fB";
   } else if (amount <= 1) {
     amount *= 1024;
-    snprintf(tempBuffer, sizeof(tempBuffer), "%.1fKiB", amount);
+    format = ((int)amount == amount) ? "%.0fKiB" : "%.1fKiB";
   } else
-    snprintf(tempBuffer, sizeof(tempBuffer), "%.1fMiB", amount);
+    format = ((int)amount == amount) ? "%.0fMiB" : "%.1fMiB";
 
+  snprintf(tempBuffer, sizeof(tempBuffer), format, amount);
   *buffer = createString(tempBuffer);
 }
 
