@@ -26,7 +26,8 @@ void parseDetails(char *summary, packageInfo *package) {
     char *slashPtr;
     char *subToken = strtok_r(token, "/", &slashPtr);
     if (subToken != NULL)
-      package->downloaded = strdup(subToken);
+      changePackageInfo(package, 1, strdup(subToken));
+    // package->downloaded = strdup(subToken);
     subToken = strtok_r(NULL, "/", &slashPtr);
 
     if (subToken != NULL) {
@@ -34,7 +35,8 @@ void parseDetails(char *summary, packageInfo *package) {
       char *smallerSubToken = strtok_r(subToken, "(", &paranthesisPtr);
 
       if (smallerSubToken != NULL)
-        package->totalSize = strdup(smallerSubToken);
+        changePackageInfo(package, 2, strdup(smallerSubToken));
+      // package->totalSize = strdup(smallerSubToken);
 
       smallerSubToken = strtok_r(NULL, "(", &paranthesisPtr);
 
@@ -52,7 +54,8 @@ void parseDetails(char *summary, packageInfo *package) {
     token++;
   token++;
 
-  package->speed = strdup(token);
+  changePackageInfo(package, 3, strdup(token));
+  // package->speed = strdup(token);
 }
 
 void downloadPackage(packageInfo *packageInformation) {
