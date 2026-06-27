@@ -10,13 +10,6 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-FILE *openLogFile(packageInfo *package) {
-  char logFile[50] = "/usr/share/pacx/log/";
-  strcat(logFile, package->packageName);
-
-  return fopen(logFile, "a");
-}
-
 void parseDetails(char *summary, packageInfo *package) {
   if (strstr(summary, "ETA:") == NULL)
     return;
@@ -102,14 +95,21 @@ void downloadPackage(packageInfo *packageInformation) {
       } else if (processPID > 0) { // Parent Process
         // Reading the stdout of the child process
         close(processPipe[1]); // We dont want to write to the pipe
-        char buffer[512];
 
-        while ((read(processPipe[0], buffer, sizeof(buffer))) != 0) {
-          buffer[strcspn(buffer, "\n")] = '\0';
+        char buffer[128];
+
+        while ((read(processPipe[0], buffer, sizeof(buffer) - 1)) != 0) {
+          unsigned int newlinePos =
+              strcspn(buffer, "\n"); // Only want the first line
+
+          // Overflow check
+          newlinePos =
+              newlinePos >= sizeof(buffer) ? sizeof(buffer) - 1 : newlinePos;
+          buffer[newlinePos] = '\0';
+
           char info[strlen(buffer) + 1];
           strncpy(info, buffer, strlen(buffer) + 1);
           parseDetails(info, packageInformation);
-          // getDetails(info, &packageInformation);
         }
 
         kill(processPID, SIGKILL);
