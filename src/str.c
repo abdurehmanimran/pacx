@@ -28,6 +28,7 @@ String *createString(char *str) {
 
   stringStruct->size = strlen(str);
   stringStruct->capacity = strlen(str) + 1;
+  memset(stringStruct->str, 0, sizeof(char) * stringStruct->size);
   strcpy(stringStruct->str, str);
 
   return stringStruct;
