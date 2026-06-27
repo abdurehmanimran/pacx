@@ -193,7 +193,7 @@ void getArgumentPackages(String **buffer) {
 // Returns a malloced list of packages each on a separate line
 char *getPackageNames(int toUpdate) {
   String *command;
-  String *argumentPackages;
+  String *argumentPackages = NULL;
   String *packageNames = createString("");
 
   if (toUpdate)
@@ -221,7 +221,8 @@ char *getPackageNames(int toUpdate) {
   char *returnStr = strdup(packageNames->str);
 
   freeString(command);
-  freeString(argumentPackages);
+  if (argumentPackages != NULL)
+    freeString(argumentPackages);
   freeString(packageNames);
 
   return returnStr;
