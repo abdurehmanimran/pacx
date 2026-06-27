@@ -263,7 +263,7 @@ void movePackages() {
   char *mvArgs[] = {"sh", "-c",
                     "mv /usr/share/pacx/cache/* /var/cache/pacman/pkg/", NULL};
   execute(mvArgs);
-  printf(GREEN " ::" WHITE " Successfully moved " GREEN "%d" WHITE
+  printf(GREEN "::" WHITE " Successfully moved " GREEN "%d" WHITE
                " packages!!\n",
          packageList.n);
 }
