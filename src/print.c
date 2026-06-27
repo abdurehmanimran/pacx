@@ -57,7 +57,7 @@ void printDownloadInfo(packageInfo *package) {
              calcColWidth(8), package->downloaded, calcColWidth(10) - 3,
              calcColWidth(10) - 4, package->speed);
       printf(GREEN);
-      printProgress(package->progress, calcColWidth(39) - 4);
+      printProgress(package->progress, calcColWidth(39) - 2);
       printf(WHITE "%3d%%\n", package->progress);
 
     } else { // For Smaller Terminal Widths
