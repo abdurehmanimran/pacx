@@ -90,7 +90,7 @@ void printTotalStats(char *totalDownloaded, char *totalSpeed) {
     else
       printf(RED " %s " WHITE, totalSpeed);
     printf(GREEN);
-    printProgress(100, calcColWidth(40) - 1);
+    printProgress(100, calcColWidth(40));
   } else {
     printProgress(100, calcColWidth(30) - strlen("Stats") - 2 - 2);
     printProgress(100, calcColWidth(14) - strlen(totalDownloaded) - 2);
