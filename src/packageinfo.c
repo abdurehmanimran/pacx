@@ -19,7 +19,6 @@ void freePackageInfo(packageInfo **package) {
   free((*package)->downloaded);
   free((*package)->speed);
   free((*package)->totalSize);
-  // free((*package)->url);
   free(*package);
 }
 

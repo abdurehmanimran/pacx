@@ -117,8 +117,8 @@ void fetchPackages(packageInfoList *packageList) {
   pthread_t *threads;
   double completedDownloaded = 0;
 
-  packageInfoList packagesDownloading;
-  initPackageList(&packagesDownloading);
+  packageInfoList *packagesDownloading = malloc(sizeof(packageInfoList));
+  initPackageList(packagesDownloading);
 
   int initThreads = packageList->n >= PARALLEL_DOWNLOADS ? PARALLEL_DOWNLOADS
                                                          : packageList->n;
@@ -127,38 +127,37 @@ void fetchPackages(packageInfoList *packageList) {
   threads = (pthread_t *)malloc(sizeof(pthread_t) * (initThreads));
 
   for (int i = 0; i < initThreads; i++) {
-    insertPackage(&packagesDownloading, packageList->packages[i]);
+    insertPackage(packagesDownloading, packageList->packages[i]);
     pthread_create(&threads[i], NULL, startDownload,
-                   packagesDownloading.packages[packagesDownloading.n - 1]);
+                   packagesDownloading->packages[packagesDownloading->n - 1]);
   }
 
   HIDE_CURSOR;
   while (1) {
-    for (int i = 0; i < packagesDownloading.n; i++) {
-      if (packagesDownloading.packages[i]->progress == 100 ||
-          packagesDownloading.packages[i]->notFinished == 0) {
-        printCompleted(packagesDownloading.packages[i]);
-        addAmount(packagesDownloading.packages[i]->downloaded,
+    for (int i = 0; i < packagesDownloading->n; i++) {
+      if (packagesDownloading->packages[i]->progress == 100 ||
+          packagesDownloading->packages[i]->notFinished == 0) {
+        printCompleted(packagesDownloading->packages[i]);
+        addAmount(packagesDownloading->packages[i]->downloaded,
                   &completedDownloaded);
-        popPackage(&packagesDownloading, packagesDownloading.packages[i]);
+        popPackage(packagesDownloading, packagesDownloading->packages[i]);
         if (index < packageList->n) {
-          insertPackage(&packagesDownloading, packageList->packages[index++]);
+          insertPackage(packagesDownloading, packageList->packages[index++]);
           pthread_create(
               &threads[i], NULL, startDownload,
-              packagesDownloading.packages[packagesDownloading.n - 1]);
+              packagesDownloading->packages[packagesDownloading->n - 1]);
         } else {
         }
       }
     }
 
-    if (packagesDownloading.n <= 0) {
+    if (packagesDownloading->n <= 0) {
       puts("");
-      free(threads);
-      return;
+      goto cleanup;
     }
 
-    for (int i = 0; i < packagesDownloading.n; i++) {
-      printDownloadInfo(packagesDownloading.packages[i]);
+    for (int i = 0; i < packagesDownloading->n; i++) {
+      printDownloadInfo(packagesDownloading->packages[i]);
     }
 
     String *totalSpeed;
@@ -167,12 +166,18 @@ void fetchPackages(packageInfoList *packageList) {
                    completedDownloaded);
     printTotalStats(totalDownloaded->str, totalSpeed->str);
 
-    MOVE_N_LINES_UP(packagesDownloading.n + 1);
+    freeString(totalSpeed);
+    freeString(totalDownloaded);
+
+    MOVE_N_LINES_UP(packagesDownloading->n + 1);
 
     usleep(5000);
   }
   SHOW_CURSOR;
 
+cleanup:
+  freePackageList(packagesDownloading);
+  free(packagesDownloading);
   free(threads);
 }
 
@@ -194,7 +199,7 @@ void getArgumentPackages(String **buffer) {
 char *getPackageNames(int toUpdate) {
   String *command;
   String *argumentPackages = NULL;
-  String *packageNames = createString("");
+  String *packageNames;
 
   if (toUpdate)
     command = createString("pacman -Su --print-format %n");

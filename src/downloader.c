@@ -63,6 +63,7 @@ void downloadPackage(packageInfo *packageInformation) {
 
   if (url != NULL) {
     if (strcspn(url, "file") == 0) {
+      free(url);
       packageInformation->progress = 100;
       packageInformation->notFinished = 0;
     } else {
