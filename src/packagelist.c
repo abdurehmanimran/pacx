@@ -16,8 +16,6 @@ void initPackageList(packageInfoList *packageList) {
 }
 
 int insertPackage(packageInfoList *packageList, packageInfo *package) {
-  packageList->n++;
-
   if (packageList->capacity < packageList->n) {
     packageList->capacity += 128;
     packageInfo **tempPtr = realloc(
@@ -28,6 +26,8 @@ int insertPackage(packageInfoList *packageList, packageInfo *package) {
       puts("Error: Failed to expand the packageList");
       return -1;
     }
+
+    packageList->n++;
   }
 
   packageList->packages[packageList->n - 1] = package;
