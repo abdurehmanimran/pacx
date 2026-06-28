@@ -8,7 +8,7 @@
 
 void initPackageList(packageInfoList *packageList) {
   packageList->n = 0;
-  packageList->capacity = 1;
+  packageList->capacity = INIT_LIST_CAP;
   packageList->packages =
       (packageInfo **)malloc(sizeof(packageInfo *) * INIT_LIST_CAP);
   if (packageList->packages == NULL)
