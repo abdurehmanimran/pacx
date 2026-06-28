@@ -1,4 +1,5 @@
 #include "downloader.h"
+#include "colors.h"
 #include "packageinfo.h"
 #include "packagelist.h"
 #include "urls.h"
@@ -27,19 +28,16 @@ void parseDetails(char *summary, packageInfo *package) {
     char *subToken = strtok_r(token, "/", &slashPtr);
     if (subToken != NULL)
       changePackageInfo(package, 1, strdup(subToken));
-    // package->downloaded = strdup(subToken);
-    subToken = strtok_r(NULL, "/", &slashPtr);
 
+    subToken = strtok_r(NULL, "/", &slashPtr);
     if (subToken != NULL) {
       char *paranthesisPtr;
       char *smallerSubToken = strtok_r(subToken, "(", &paranthesisPtr);
 
       if (smallerSubToken != NULL)
         changePackageInfo(package, 2, strdup(smallerSubToken));
-      // package->totalSize = strdup(smallerSubToken);
 
       smallerSubToken = strtok_r(NULL, "(", &paranthesisPtr);
-
       if (smallerSubToken != NULL)
         package->progress = atoi(smallerSubToken);
     }
@@ -55,78 +53,80 @@ void parseDetails(char *summary, packageInfo *package) {
   token++;
 
   changePackageInfo(package, 3, strdup(token));
-  // package->speed = strdup(token);
 }
 
 void downloadPackage(packageInfo *packageInformation) {
   char *url = getPackageURL(packageInformation->packageName);
+  if (!url) {
+    printf(RED "Error:" WHITE " failed to fetch the url !!\n");
+    return;
+  }
 
-  if (url != NULL) {
-    if (strcspn(url, "file") == 0) {
-      free(url);
-      packageInformation->progress = 100;
-      packageInformation->notFinished = 0;
-    } else {
-      pid_t processPID;
-      int processPipe[2];
-      pipe(processPipe);
+  if (strcspn(url, "file") == 0) { // No need to download
+    free(url);
+    packageInformation->progress = 100;
+    packageInformation->notFinished = 0;
+    return;
+  }
 
-      processPID = fork();
-      if (processPID == 0) { // Child process
-        // Process Pipe SetUp
-        close(processPipe[0]);   // No need for reading
-        dup2(processPipe[1], 1); // Piping stdout
-        dup2(processPipe[1], 2); // Piping stderr
-        close(processPipe[1]);
+  pid_t processPID;
+  int processPipe[2];
+  pipe(processPipe);
 
-        // Executing aria2c
-        char *args[] = {"aria2c",
-                        "--continue",
-                        "--optimize-concurrent-downloads",
-                        "-s",
-                        "6",
-                        "-x",
-                        "8",
-                        "--file-allocation",
-                        "none",
-                        "--summary-interval",
-                        UPDATE_INTERVAL,
-                        url,
-                        "-d",
-                        DOWNLOAD_DIRECTORY,
-                        NULL};
-        execvp(args[0], args);
-      } else if (processPID > 0) { // Parent Process
-        // Reading the stdout of the child process
-        close(processPipe[1]); // We dont want to write to the pipe
+  processPID = fork();
+  if (processPID == 0) { // Child process
+    // Process Pipe SetUp
+    close(processPipe[0]);   // No need for reading
+    dup2(processPipe[1], 1); // Piping stdout
+    dup2(processPipe[1], 2); // Piping stderr
+    close(processPipe[1]);
 
-        char buffer[128];
+    // Executing aria2c
+    char *args[] = {"aria2c",
+                    "--continue",
+                    "--optimize-concurrent-downloads",
+                    "-s",
+                    "6",
+                    "-x",
+                    "8",
+                    "--file-allocation",
+                    "none",
+                    "--summary-interval",
+                    UPDATE_INTERVAL,
+                    url,
+                    "-d",
+                    DOWNLOAD_DIRECTORY,
+                    NULL};
+    execvp(args[0], args);
+  } else if (processPID > 0) { // Parent Process
+    // Reading the stdout of the child process
+    close(processPipe[1]); // We dont want to write to the pipe
 
-        while ((read(processPipe[0], buffer, sizeof(buffer) - 1)) != 0) {
-          unsigned int newlinePos =
-              strcspn(buffer, "\n"); // Only want the first line
+    char buffer[128];
 
-          // Overflow check
-          newlinePos =
-              newlinePos >= sizeof(buffer) ? sizeof(buffer) - 1 : newlinePos;
-          buffer[newlinePos] = '\0';
+    while ((read(processPipe[0], buffer, sizeof(buffer) - 1)) != 0) {
+      unsigned int newlinePos =
+          strcspn(buffer, "\n"); // Only want the first line
 
-          char info[strlen(buffer) + 1];
-          strncpy(info, buffer, strlen(buffer) + 1);
-          parseDetails(info, packageInformation);
-        }
+      // Overflow check
+      newlinePos =
+          newlinePos >= sizeof(buffer) ? sizeof(buffer) - 1 : newlinePos;
+      buffer[newlinePos] = '\0';
 
-        kill(processPID, SIGKILL);
-        int status;
-        waitpid(processPID, &status, 0);
-
-        packageInformation->progress = 100;
-        free(url);
-      } else {
-        printf("Error while downloading the package: %s\n",
-               packageInformation->packageName);
-      }
+      char info[strlen(buffer) + 1];
+      strncpy(info, buffer, strlen(buffer) + 1);
+      parseDetails(info, packageInformation);
     }
+
+    kill(processPID, SIGKILL);
+    int status;
+    waitpid(processPID, &status, 0);
+
+    packageInformation->progress = 100;
+    free(url);
+  } else { // Fork error
+    printf("Error while downloading the package: %s\n",
+           packageInformation->packageName);
   }
 }
 
