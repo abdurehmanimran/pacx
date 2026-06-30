@@ -8,7 +8,7 @@
 
 #define MIRROR_URLS 5
 
-String *getRawMirrors(char *path) {
+String *getRawMirrors(char *path, packageAttr *attrs) {
   String *output;
   int count = 0;
   allocString(&output, 512);
@@ -30,17 +30,37 @@ String *getRawMirrors(char *path) {
       int line_end_index = strcspn(url, "\n");
       if (line_end_index >= 511)
         line_end_index = 510;
-      url[line_end_index] = ' ';
+      url[line_end_index] = '\0';
 
       stringAppend(&output, url);
+      fillURLPlaceholders(&output, attrs);
+      stringAppend(&output, "/");
+      stringAppend(&output, attrs->fileName);
+      stringAppend(&output, " ");
 
       memset(temp_buffer, 0, sizeof(temp_buffer));
       count++;
     }
   }
 
+  output->str[output->size - 1] = '\0';
   fclose(mirrorlist);
   return output;
+}
+
+void fillURLPlaceholders(String **urls, packageAttr *attrs) {
+  if (!urls || (*urls)->size == 0)
+    return;
+
+  char archBuff[24];
+  memset(archBuff, 0, sizeof(archBuff));
+  char *archStart = strstr((*urls)->str, "$arch");
+
+  for (int i = 0; *archStart != '/'; archStart++)
+    archBuff[i++] = *archStart;
+
+  replaceInString(urls, archBuff, attrs->arch);
+  replaceInString(urls, "$repo", attrs->repo);
 }
 
 char *getPackageURL(char *package) {
