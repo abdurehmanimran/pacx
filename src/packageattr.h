@@ -7,6 +7,7 @@ typedef struct {
   char *arch;
   char *repo;
   char *fileName;
+  char *url;
 } packageAttr;
 
 packageAttr *initPackageAttr();

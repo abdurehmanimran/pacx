@@ -27,6 +27,8 @@ void freePackageAttr(packageAttr *pkgAttr) {
     free(pkgAttr->repo);
   if (pkgAttr->fileName)
     free(pkgAttr->fileName);
+  if (pkgAttr->url)
+    free(pkgAttr->url);
 
   if (pkgAttr)
     free(pkgAttr);
