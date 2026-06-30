@@ -7,5 +7,7 @@
 char *getPackageURL(char *package);
 String *getRawMirrors(char *path, packageAttr *attrs);
 void fillURLPlaceholders(String **urls, packageAttr *attrs);
+packageAttr *getPackageAttr(char *package);
+String *getMirrors(char *package);
 
 #endif // URLS_H

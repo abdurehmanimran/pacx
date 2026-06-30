@@ -1,5 +1,6 @@
 #include "urls.h"
 #include "colors.h"
+#include "packageattr.h"
 #include "str.h"
 #include <stdio.h>
 #include <stdlib.h>
@@ -56,7 +57,7 @@ void fillURLPlaceholders(String **urls, packageAttr *attrs) {
   memset(archBuff, 0, sizeof(archBuff));
   char *archStart = strstr((*urls)->str, "$arch");
 
-  for (int i = 0; *archStart != '/'; archStart++)
+  for (int i = 0; *archStart != '/' && *archStart != 0; archStart++)
     archBuff[i++] = *archStart;
 
   replaceInString(urls, archBuff, attrs->arch);
@@ -95,4 +96,90 @@ char *getPackageURL(char *package) {
   returnUrls[strcspn(returnUrls, "\n")] = '\0';
 
   return returnUrls;
+}
+
+packageAttr *getPackageAttr(char *package) {
+  packageAttr *pkgAttr = initPackageAttr();
+  FILE *process;
+  String *pacmanOut = NULL; // getOutput allocates memory itself
+  String *command = NULL;
+
+  if (package != NULL) { // When package name is provided
+    command = createString("pacman -Sddp ");
+    stringAppend(&command, package);
+    stringAppend(&command, " --print-format \"%a %r %f %l\"");
+  } else {
+    printf(RED "Error: " WHITE "Package Name is NULL!!");
+    goto nullCleanUp;
+  }
+
+  if ((process = popen(command->str, "r")) == NULL) {
+    printf("Failed to get URL");
+    goto nullCleanUp;
+  }
+
+  if ((pacmanOut = getOutput(process)) == NULL) {
+    printf(RED "Error:" WHITE " No URL found for the package: %s\n", package);
+    pclose(process);
+    goto nullCleanUp;
+  }
+  pclose(process);
+
+  char *i, *save;
+  i = strtok_r(pacmanOut->str, " ", &save);
+  if (!i)
+    goto nullCleanUp;
+  pkgAttr->arch = strdup(i);
+  i = strtok_r(NULL, " ", &save);
+  if (!i)
+    goto nullCleanUp;
+  pkgAttr->repo = strdup(i);
+  i = strtok_r(NULL, " ", &save);
+  if (!i)
+    goto nullCleanUp;
+  pkgAttr->fileName = strdup(i);
+
+  i = strtok_r(NULL, " ", &save);
+  if (!i)
+    goto nullCleanUp;
+  i[strcspn(i, "\n")] = 0;
+  pkgAttr->url = strdup(i);
+
+cleanup:
+  if (command)
+    freeString(command);
+  if (pacmanOut) {
+    freeString(pacmanOut);
+  }
+  return pkgAttr;
+
+nullCleanUp:
+  if (pkgAttr)
+    free(pkgAttr);
+  pkgAttr = NULL;
+  goto cleanup;
+}
+
+String *getMirrors(char *package) {
+  String *mirrors = NULL;
+  packageAttr *pkgAttr = NULL;
+  String *listPath = NULL;
+
+  pkgAttr = getPackageAttr(package);
+  if (!pkgAttr)
+    goto cleanup;
+
+  if (strstr(pkgAttr->url, "file://"))
+    goto cleanup;
+
+  listPath = getMirrorListPath(pkgAttr);
+  mirrors = getRawMirrors(listPath->str, pkgAttr);
+
+cleanup:
+  if (pkgAttr != NULL)
+    freePackageAttr(pkgAttr);
+  if (listPath != NULL)
+    freeString(listPath);
+
+  return mirrors;
 }
