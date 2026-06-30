@@ -114,6 +114,7 @@ String *getOutput(FILE *stream) {
       fread(buffer, sizeof(char), sizeof(buffer) - 1, stream);
 
   if (bytes == 0) {
+    freeString(output);
     return NULL;
   }
 
