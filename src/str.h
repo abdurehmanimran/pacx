@@ -20,6 +20,7 @@ String *createString(char *str);
 void stringAppend(String **dest, char *srcStr);
 void stringCat(String **dest, String *src);
 
+void replaceInString(String **str, char *find, char *replace);
 String *getOutput(FILE *stream);
 
 #endif // !STR_H

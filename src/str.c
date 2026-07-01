@@ -67,6 +67,42 @@ void stringCat(String **dest, String *src) {
   (*dest)->str[index] = 0;
 }
 
+void replaceInString(String **str, char *find, char *replace) {
+  unsigned int findlen = strlen(find);
+  unsigned int replacelen = strlen(replace);
+  int offset = replacelen - findlen;
+
+  for (unsigned int i = 0; i < (*str)->size; i++) {
+    char found = 1;
+
+    if (strstr((*str)->str, find) != (*str)->str + i)
+      found = 0;
+
+    if (found) {
+      while (offset + (*str)->size > (*str)->capacity)
+        expandStringCap(str);
+
+      // Slide to the right starting from the end
+      if (offset > 0) {
+        for (unsigned int k = (*str)->size - 1; k >= findlen + i; k--)
+          (*str)->str[k + offset] = (*str)->str[k];
+      } else { // Slide to the left starting from the left side
+        for (unsigned int k = findlen + i; k < (*str)->size; k++)
+          (*str)->str[k + offset] = (*str)->str[k];
+      }
+
+      // Calculate the new size and place the null character accordingly
+      (*str)->size += offset;
+      (*str)->str[(*str)->size] = '\0';
+
+      // Replace
+      for (unsigned int k = 0; k < replacelen; k++) {
+        (*str)->str[k + i] = replace[k];
+      }
+    }
+  }
+}
+
 String *getOutput(FILE *stream) {
   String *output;
   allocString(&output, 2128);
@@ -78,6 +114,7 @@ String *getOutput(FILE *stream) {
       fread(buffer, sizeof(char), sizeof(buffer) - 1, stream);
 
   if (bytes == 0) {
+    freeString(output);
     return NULL;
   }
 

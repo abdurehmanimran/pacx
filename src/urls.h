@@ -1,8 +1,13 @@
 #ifndef URLS_H
 #define URLS_H
 
-typedef char *packageURL;
+#include "packageattr.h"
+#include "str.h"
 
-packageURL getPackageURL(char *package);
+char *getPackageURL(char *package);
+String *getRawMirrors(char *path, packageAttr *attrs);
+void fillURLPlaceholders(String **urls, packageAttr *attrs);
+packageAttr *getPackageAttr(char *package);
+String *getMirrors(char *package);
 
 #endif // URLS_H

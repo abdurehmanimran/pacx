@@ -12,7 +12,7 @@
 #include <unistd.h>
 
 void parseDetails(char *summary, packageInfo *package) {
-  if (strstr(summary, "ETA:") == NULL)
+  if (strstr(summary, "DL:") == NULL || strstr(summary, "ETA:") == NULL)
     return;
 
   char *whitespace_ptr;
@@ -56,14 +56,17 @@ void parseDetails(char *summary, packageInfo *package) {
 }
 
 void downloadPackage(packageInfo *packageInformation) {
-  char *url = getPackageURL(packageInformation->packageName);
-  if (!url) {
+  String *urls = getMirrors(packageInformation->packageName);
+
+  if (!urls) {
     printf(RED "Error:" WHITE " failed to fetch the url !!\n");
     return;
   }
 
-  if (strcspn(url, "file") == 0) { // No need to download
-    free(url);
+  // getMirrors returns only "file" when the package is already present in
+  // pacman's cache
+  if (strcmp(urls->str, "file") == 0) { // No need to download
+    freeString(urls);
     packageInformation->progress = 100;
     packageInformation->notFinished = 0;
     return;
@@ -82,21 +85,31 @@ void downloadPackage(packageInfo *packageInformation) {
     close(processPipe[1]);
 
     // Executing aria2c
-    char *args[] = {"aria2c",
-                    "--continue",
-                    "--optimize-concurrent-downloads",
-                    "-s",
-                    "6",
-                    "-x",
-                    "8",
-                    "--file-allocation",
-                    "none",
-                    "--summary-interval",
-                    UPDATE_INTERVAL,
-                    url,
-                    "-d",
-                    DOWNLOAD_DIRECTORY,
-                    NULL};
+    char *args[19] = {
+        "aria2c",
+        "--continue",
+        "--optimize-concurrent-downloads",
+        "-s",
+        "4",
+        "-x",
+        "4",
+        "--file-allocation",
+        "none",
+        "--summary-interval",
+        UPDATE_INTERVAL,
+    };
+
+    args[16] = "-d";
+    args[17] = DOWNLOAD_DIRECTORY;
+    args[18] = NULL;
+
+    char *i, *save;
+    int index = 11;
+
+    for (i = strtok_r(urls->str, " ", &save); i && index < 16;
+         i = strtok_r(NULL, " ", &save))
+      args[index++] = strdup(i);
+
     execvp(args[0], args);
   } else if (processPID > 0) { // Parent Process
     // Reading the stdout of the child process
@@ -123,7 +136,9 @@ void downloadPackage(packageInfo *packageInformation) {
     waitpid(processPID, &status, 0);
 
     packageInformation->progress = 100;
-    free(url);
+
+    freeString(urls);
+
   } else { // Fork error
     printf("Error while downloading the package: %s\n",
            packageInformation->packageName);
