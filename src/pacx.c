@@ -71,7 +71,7 @@ void addAmount(const char *amount, double *total) {
     *total += atof(amount) / (1024.0 * 1024.0);
 }
 
-void chooseUnit(double amount, String **buffer) {
+String *chooseUnit(double amount) {
   char tempBuffer[24];
   char *format;
 
@@ -88,7 +88,7 @@ void chooseUnit(double amount, String **buffer) {
     format = ((int)amount == amount) ? "%.0fMiB" : "%.1fMiB";
 
   snprintf(tempBuffer, sizeof(tempBuffer), format, amount);
-  *buffer = createString(tempBuffer);
+  return createString(tempBuffer);
 }
 
 void calcTotalSpeed(packageInfoList *packageList, String **totalSpeed,
@@ -108,9 +108,9 @@ void calcTotalSpeed(packageInfoList *packageList, String **totalSpeed,
 
   downloadedInMBs += prevDownloaded;
 
-  chooseUnit(speedInMBs, totalSpeed);
+  *totalSpeed = chooseUnit(speedInMBs);
   stringAppend(totalSpeed, "/s");
-  chooseUnit(downloadedInMBs, totalDownloaded);
+  *totalDownloaded = chooseUnit(downloadedInMBs);
 }
 
 void fetchPackages(packageInfoList *packageList) {
