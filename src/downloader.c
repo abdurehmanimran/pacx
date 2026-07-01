@@ -3,6 +3,7 @@
 #include "db.h"
 #include "packageinfo.h"
 #include "packagelist.h"
+#include "str.h"
 #include "urls.h"
 #include <pthread.h>
 #include <signal.h>
@@ -59,6 +60,10 @@ void parseDetails(char *summary, packageInfo *package) {
 void downloadPackage(packageInfo *packageInformation) {
   String *urls = NULL;
   if (packageInformation->isRepo) {
+    String *fullpath = createString(DB_DIRECTORY "/");
+    stringAppend(&fullpath, packageInformation->packageName);
+    remove(fullpath->str);
+    freeString(fullpath);
     urls = getRepoMirrors(packageInformation->packageName);
   } else
     urls = getMirrors(packageInformation->packageName);
