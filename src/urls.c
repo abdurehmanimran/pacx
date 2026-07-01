@@ -53,14 +53,8 @@ void fillURLPlaceholders(String **urls, packageAttr *attrs) {
   if (!urls || (*urls)->size == 0)
     return;
 
-  char archBuff[24];
-  memset(archBuff, 0, sizeof(archBuff));
-  char *archStart = strstr((*urls)->str, "$arch");
-
-  for (int i = 0; *archStart != '/' && *archStart != 0; archStart++)
-    archBuff[i++] = *archStart;
-
-  replaceInString(urls, archBuff, attrs->arch);
+  // replaceInString(urls, archBuff, attrs->arch);
+  replaceInString(urls, "$arch", "x86_64");
   replaceInString(urls, "$repo", attrs->repo);
 }
 
@@ -73,7 +67,7 @@ packageAttr *getPackageAttr(char *package) {
   if (package != NULL) { // When package name is provided
     command = createString("pacman -Sddp ");
     stringAppend(&command, package);
-    stringAppend(&command, " --print-format \"%a %r %f %l\"");
+    stringAppend(&command, " --print-format \"%r %f %l\"");
   } else {
     printf(RED "Error: " WHITE "Package Name is NULL!!");
     goto nullCleanUp;
@@ -91,15 +85,13 @@ packageAttr *getPackageAttr(char *package) {
   }
   pclose(process);
 
+  // Pattern: Repo FileName URL
   char *i, *save;
   i = strtok_r(pacmanOut->str, " ", &save);
   if (!i)
     goto nullCleanUp;
-  pkgAttr->arch = strdup(i);
-  i = strtok_r(NULL, " ", &save);
-  if (!i)
-    goto nullCleanUp;
   pkgAttr->repo = strdup(i);
+
   i = strtok_r(NULL, " ", &save);
   if (!i)
     goto nullCleanUp;

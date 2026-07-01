@@ -21,8 +21,6 @@ packageAttr *initPackageAttr() {
 }
 
 void freePackageAttr(packageAttr *pkgAttr) {
-  if (pkgAttr->arch)
-    free(pkgAttr->arch);
   if (pkgAttr->repo)
     free(pkgAttr->repo);
   if (pkgAttr->fileName)
@@ -32,39 +30,6 @@ void freePackageAttr(packageAttr *pkgAttr) {
 
   if (pkgAttr)
     free(pkgAttr);
-}
-
-packageAttr *getPackageAttrs(char *url) {
-  char *i;
-  char *savePtr;
-  packageAttr *pkgAttr = initPackageAttr();
-
-  i = strtok_r(url, "/", &savePtr);
-
-  while (i != NULL && strstr(i, "x86_64") == NULL) {
-    i = strtok_r(NULL, "/", &savePtr);
-  }
-
-  if (!i)
-    goto nullCleanUp;
-  puts(i);
-  pkgAttr->arch = strdup(i);
-  i = strtok_r(NULL, "/", &savePtr);
-  if (!i)
-    goto nullCleanUp;
-  puts(i);
-  pkgAttr->repo = strdup(i);
-  i = strtok_r(NULL, "/", &savePtr);
-  if (!i)
-    goto nullCleanUp;
-  puts(i);
-  pkgAttr->fileName = strdup(i);
-
-  return pkgAttr;
-
-nullCleanUp:
-  freePackageAttr(pkgAttr);
-  return NULL;
 }
 
 String *getMirrorListPath(packageAttr *attr) {

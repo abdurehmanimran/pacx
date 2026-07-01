@@ -4,7 +4,6 @@
 #include "str.h"
 
 typedef struct {
-  char *arch;
   char *repo;
   char *fileName;
   char *url;
@@ -12,7 +11,6 @@ typedef struct {
 
 packageAttr *initPackageAttr();
 void freePackageAttr(packageAttr *pkgAttr);
-packageAttr *getPackageAttrs(char *url);
 String *getMirrorListPath(packageAttr *attr);
 
 #endif
