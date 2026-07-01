@@ -20,7 +20,7 @@
 Argument args[] = {{"-h", printHelp},        {"--help", printHelp},
                    {"-S", syncPackages},     {"-s", syncPackages},
                    {"--sync", syncPackages}, {"-Su", updatePackages},
-                   {"-Sy", syncDBs}};
+                   {"-Sy", syncDBs},         {"-Syu", syncDBs}};
 
 int totalArgs;
 char **arguments;
@@ -354,4 +354,7 @@ void syncDBs() {
   fetchPackages(&dbList, 1);
 
   freePackageList(&dbList);
+
+  if (strcmp(arguments[currentArg], "-Syu") == 0)
+    updatePackages();
 }
