@@ -4,7 +4,6 @@
 #include "packageattr.h"
 #include "str.h"
 
-char *getPackageURL(char *package);
 String *getRawMirrors(char *path, packageAttr *attrs);
 void fillURLPlaceholders(String **urls, packageAttr *attrs);
 packageAttr *getPackageAttr(char *package);
