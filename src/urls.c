@@ -169,10 +169,15 @@ String *getMirrors(char *package) {
   if (!pkgAttr)
     goto cleanup;
 
-  if (strstr(pkgAttr->url, "file://"))
+  if (strstr(pkgAttr->url, "file://")) {
+    mirrors = createString("file");
     goto cleanup;
+  }
 
   listPath = getMirrorListPath(pkgAttr);
+  if (!listPath)
+    goto cleanup;
+
   mirrors = getRawMirrors(listPath->str, pkgAttr);
 
 cleanup:
