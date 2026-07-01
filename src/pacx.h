@@ -12,5 +12,6 @@ int isSudo();
 // void printHelp(int currentArg, char **argv);
 void syncPackages();
 void updatePackages();
+void syncDBs();
 
 #endif // !PACX_H
