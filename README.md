@@ -15,16 +15,20 @@ To compile the project from source code, clone the repository and run `make`. Th
 ```
 git clone https://github.com/abdurehmanimran/pacx.git
 cd pacx
-make
+make build
 ```
 For optimized builds, use `build-release` instead of `build`.
 ```
 make build-release
 ```
-The binary can be installed as:
+The release binary can be installed as:
 
 ```
 sudo make install
+```
+Otherwise, in case of debug build (simple build) as:
+```
+sudo make install-debug
 ```
 
 ## See It In Action
