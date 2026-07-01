@@ -6,7 +6,7 @@
 #include <stdio.h>
 #include <string.h>
 
-void createDBPackageList(packageInfoList *dbList, packageInfoList *sigList) {
+void createDBPackageList(packageInfoList *dbList) {
   FILE *pacmanConf = fopen(PACMAN_CONFIG_PATH, "r");
   char lineBuff[128];
   memset(lineBuff, 0, sizeof(lineBuff));
@@ -34,12 +34,6 @@ void createDBPackageList(packageInfoList *dbList, packageInfoList *sigList) {
 
     String *dbName = createString(lineBuff + 1);
     stringAppend(&dbName, ".db");
-    String *sigName = createString(lineBuff + 1);
-    stringAppend(&sigName, ".db.sig");
-
-    packageInfo *sig;
-    initPackageInfo(&sig, sigName->str);
-    insertPackage(sigList, sig);
 
     packageInfo *db;
     initPackageInfo(&db, dbName->str);
@@ -47,8 +41,6 @@ void createDBPackageList(packageInfoList *dbList, packageInfoList *sigList) {
 
     if (dbName)
       freeString(dbName);
-    if (sigName)
-      freeString(sigName);
   }
 
   fclose(pacmanConf);
