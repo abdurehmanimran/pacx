@@ -115,7 +115,7 @@ void downloadPackage(packageInfo *packageInformation) {
     char *i, *save;
     int index = 12;
 
-    for (i = strtok_r(urls->str, " ", &save); i && index < 16;
+    for (i = strtok_r(urls->str, " ", &save); i && index < 17;
          i = strtok_r(NULL, " ", &save))
       args[index++] = strdup(i);
 
