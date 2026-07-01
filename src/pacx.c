@@ -348,10 +348,9 @@ void updatePackages() {
 
 void syncDBs() {
   packageInfoList dbList;
-  packageInfoList sigList;
-  createDBPackageList(&dbList, &sigList);
+  createDBPackageList(&dbList);
 
-  fetchPackages(&sigList, 0);
+  printf(GREEN "::" WHITE " Syncronizing" GREEN " databases" WHITE " !!\n");
   fetchPackages(&dbList, 1);
 
   freePackageList(&dbList);
