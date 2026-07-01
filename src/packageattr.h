@@ -3,6 +3,9 @@
 
 #include "str.h"
 
+#define PACMAN_CONFIG_PATH "/etc/pacman.conf"
+#define ARCHITECTURE "x86_64"
+
 typedef struct {
   char *repo;
   char *fileName;

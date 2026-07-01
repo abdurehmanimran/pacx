@@ -4,14 +4,19 @@
 
 void initPackageInfo(packageInfo **package, char *name) {
   *package = malloc(sizeof(packageInfo));
+
   (*package)->packageName = strdup(name);
   (*package)->downloaded = strdup("0B");
   (*package)->speed = strdup("0B");
   (*package)->totalSize = strdup("0B");
-  // (*package)->url = url;
   (*package)->progress = 0;
   (*package)->downloadStarted = 0;
   (*package)->notFinished = 1;
+
+  if (strstr(name, ".db"))
+    (*package)->isRepo = 1;
+  else
+    (*package)->isRepo = 0;
 }
 
 void freePackageInfo(packageInfo **package) {

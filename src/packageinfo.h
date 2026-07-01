@@ -10,6 +10,7 @@ typedef struct {
   int progress;
   int notFinished;
   int downloadStarted;
+  int isRepo;
 } packageInfo;
 
 void initPackageInfo(packageInfo **package, char *name);

@@ -5,8 +5,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#define PACMAN_CONFIG_PATH "/etc/pacman.conf"
-
 packageAttr *initPackageAttr() {
   packageAttr *pkgAttr = NULL;
   pkgAttr = malloc(sizeof(packageAttr));

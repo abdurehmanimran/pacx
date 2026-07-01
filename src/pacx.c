@@ -3,6 +3,7 @@
 
 #include "pacx.h"
 #include "colors.h"
+#include "db.h"
 #include "downloader.h"
 #include "packageinfo.h"
 #include "packagelist.h"
@@ -16,10 +17,10 @@
 
 #define PARALLEL_DOWNLOADS 20
 
-Argument args[] = {
-    {"-h", printHelp},    {"--help", printHelp},    {"-S", syncPackages},
-    {"-s", syncPackages}, {"--sync", syncPackages}, {"-Su", updatePackages},
-};
+Argument args[] = {{"-h", printHelp},        {"--help", printHelp},
+                   {"-S", syncPackages},     {"-s", syncPackages},
+                   {"--sync", syncPackages}, {"-Su", updatePackages},
+                   {"-Sy", syncDBs},         {"-Syu", syncDBs}};
 
 int totalArgs;
 char **arguments;
@@ -113,7 +114,10 @@ void calcTotalSpeed(packageInfoList *packageList, String **totalSpeed,
   *totalDownloaded = chooseUnit(downloadedInMBs);
 }
 
-void fetchPackages(packageInfoList *packageList) {
+// Level -> 2 For all
+// Level -> 1 To exclude totol stats
+// Level -> 0 For silent downloading
+void fetchPackages(packageInfoList *packageList, int level) {
   pthread_t *threads;
   double completedDownloaded = 0;
 
@@ -130,6 +134,16 @@ void fetchPackages(packageInfoList *packageList) {
     insertPackage(packagesDownloading, packageList->packages[i]);
     pthread_create(&threads[i], NULL, startDownload,
                    packagesDownloading->packages[packagesDownloading->n - 1]);
+  }
+
+  if (level == 0) {
+    for (int i = 0; i < initThreads; i++)
+      pthread_join(threads[i], NULL);
+
+    free(threads);
+    freePackageList(packagesDownloading);
+    free(packagesDownloading);
+    return;
   }
 
   HIDE_CURSOR;
@@ -152,7 +166,8 @@ void fetchPackages(packageInfoList *packageList) {
     }
 
     if (packagesDownloading->n <= 0) {
-      puts("");
+      if (level == 2)
+        puts("");
       goto cleanup;
     }
 
@@ -160,16 +175,18 @@ void fetchPackages(packageInfoList *packageList) {
       printDownloadInfo(packagesDownloading->packages[i]);
     }
 
-    String *totalSpeed;
-    String *totalDownloaded;
-    calcTotalSpeed(packageList, &totalSpeed, &totalDownloaded,
-                   completedDownloaded);
-    printTotalStats(totalDownloaded->str, totalSpeed->str);
+    if (level == 2) {
+      String *totalSpeed;
+      String *totalDownloaded;
+      calcTotalSpeed(packageList, &totalSpeed, &totalDownloaded,
+                     completedDownloaded);
+      printTotalStats(totalDownloaded->str, totalSpeed->str);
 
-    freeString(totalSpeed);
-    freeString(totalDownloaded);
-
-    MOVE_N_LINES_UP(packagesDownloading->n + 1);
+      freeString(totalSpeed);
+      freeString(totalDownloaded);
+      MOVE_N_LINES_UP(packagesDownloading->n + 1);
+    } else
+      MOVE_N_LINES_UP(packagesDownloading->n);
 
     usleep(5000);
   }
@@ -283,7 +300,7 @@ void syncPackages() {
   printDetails(&packageList);
   puts(""); // Add a new line for separation
 
-  fetchPackages(&packageList);
+  fetchPackages(&packageList, 2);
 
   movePackages();
   freePackageList(&packageList);
@@ -320,11 +337,26 @@ void updatePackages() {
   printDetails(&packageList);
   puts("");
 
-  fetchPackages(&packageList);
+  fetchPackages(&packageList, 2);
 
   movePackages();
   freePackageList(&packageList);
 
   char *pacmanArgs[] = {"pacman", "-Su", NULL};
   execvp(pacmanArgs[0], pacmanArgs);
+}
+
+void syncDBs() {
+  packageInfoList dbList;
+  createDBPackageList(&dbList);
+
+  printf(GREEN "::" WHITE " Syncronizing" GREEN " databases" WHITE " !!\n");
+  fetchPackages(&dbList, 1);
+
+  freePackageList(&dbList);
+
+  if (strcmp(arguments[currentArg], "-Syu") == 0) {
+    puts("");
+    updatePackages();
+  }
 }

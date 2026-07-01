@@ -2,9 +2,12 @@
 #include "colors.h"
 #include "packagelist.h"
 #include "progress.h"
+#include "str.h"
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <sys/ioctl.h>
+#include <unistd.h>
 
 void printHelp() {
   printf(GREEN "Pacx\t" RED "A Pacman Wrapper\n");
@@ -32,37 +35,56 @@ int calcColWidth(int percentage) {
   return (width * percentage / 100);
 }
 
+String *getName(char *packageName) {
+  String *name = NULL;
+  // printf("\x1B[K"); // Clear line
+  if (strstr(packageName, ".")) {
+    name = createString(":: ");
+    char *dup = strdup(packageName);
+    dup[strcspn(dup, ".")] = 0;
+    stringAppend(&name, dup);
+    free(dup);
+  } else
+    name = createString(packageName);
+
+  return name;
+}
+
 void printCompleted(packageInfo *package) {
+  String *name = getName(package->packageName);
+
   printf("\x1B[K"); // Clear line
   if (getTerminalWidth() >= 110)
     printf(GREEN "%-*s"
                  "%s\n",
-           calcColWidth(60), package->packageName,
-           RED "::" WHITE " Download Completed!!");
+           calcColWidth(60), name->str, RED "::" WHITE " Download Completed!!");
   else
     printf(GREEN "%-*s"
                  "%s\n",
-           calcColWidth(50), package->packageName,
-           RED "::" WHITE " Download Completed!!");
+           calcColWidth(50), name->str, RED "::" WHITE " Download Completed!!");
+
+  if (name)
+    freeString(name);
 }
 
 void printDownloadInfo(packageInfo *package) {
-  // printf("\x1B[K"); // Clear line
+  String *name = getName(package->packageName);
+
   if (package->packageName != NULL && package->speed != NULL &&
       package->downloaded != NULL && package->totalSize != NULL) {
 
     if (getTerminalWidth() >= 110) { // For Normal Terminal Widths
       printf(GREEN "%-*.*s" WHITE "%*.*s%*.*s/s ", calcColWidth(43),
-             calcColWidth(43), package->packageName, calcColWidth(8),
-             calcColWidth(8), package->downloaded, calcColWidth(10) - 3,
-             calcColWidth(10) - 4, package->speed);
+             calcColWidth(43), name->str, calcColWidth(8), calcColWidth(8),
+             package->downloaded, calcColWidth(10) - 3, calcColWidth(10) - 4,
+             package->speed);
       printf(GREEN);
       printProgress(package->progress, calcColWidth(39) - 2);
       printf(WHITE "%3d%%\n", package->progress);
 
     } else { // For Smaller Terminal Widths
       printf(GREEN "%-*.*s" WHITE "%*.*s%*.*s/s ", calcColWidth(30),
-             calcColWidth(30) - 2, package->packageName, calcColWidth(14),
+             calcColWidth(30) - 2, name->str, calcColWidth(14),
              calcColWidth(14), package->downloaded, calcColWidth(17) - 3,
              calcColWidth(17) - 4, package->speed);
       printf(GREEN);
@@ -72,6 +94,9 @@ void printDownloadInfo(packageInfo *package) {
   } else {
     puts("");
   }
+
+  if (name)
+    freeString(name);
 }
 
 void printTotalStats(char *totalDownloaded, char *totalSpeed) {

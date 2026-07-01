@@ -1,7 +1,9 @@
 #include "downloader.h"
 #include "colors.h"
+#include "db.h"
 #include "packageinfo.h"
 #include "packagelist.h"
+#include "str.h"
 #include "urls.h"
 #include <pthread.h>
 #include <signal.h>
@@ -56,7 +58,15 @@ void parseDetails(char *summary, packageInfo *package) {
 }
 
 void downloadPackage(packageInfo *packageInformation) {
-  String *urls = getMirrors(packageInformation->packageName);
+  String *urls = NULL;
+  if (packageInformation->isRepo) {
+    String *fullpath = createString(DB_DIRECTORY "/");
+    stringAppend(&fullpath, packageInformation->packageName);
+    remove(fullpath->str);
+    freeString(fullpath);
+    urls = getRepoMirrors(packageInformation->packageName);
+  } else
+    urls = getMirrors(packageInformation->packageName);
 
   if (!urls) {
     printf(RED "Error:" WHITE " failed to fetch the url !!\n");
@@ -85,7 +95,7 @@ void downloadPackage(packageInfo *packageInformation) {
     close(processPipe[1]);
 
     // Executing aria2c
-    char *args[19] = {
+    char *args[20] = {
         "aria2c",
         "--continue",
         "--optimize-concurrent-downloads",
@@ -93,20 +103,24 @@ void downloadPackage(packageInfo *packageInformation) {
         "4",
         "-x",
         "4",
+        "--allow-overwrite",
         "--file-allocation",
         "none",
         "--summary-interval",
         UPDATE_INTERVAL,
     };
 
-    args[16] = "-d";
-    args[17] = DOWNLOAD_DIRECTORY;
-    args[18] = NULL;
+    args[17] = "-d";
+    if (packageInformation->isRepo)
+      args[18] = DB_DIRECTORY;
+    else
+      args[18] = DOWNLOAD_DIRECTORY;
+    args[19] = NULL;
 
     char *i, *save;
-    int index = 11;
+    int index = 12;
 
-    for (i = strtok_r(urls->str, " ", &save); i && index < 16;
+    for (i = strtok_r(urls->str, " ", &save); i && index < 17;
          i = strtok_r(NULL, " ", &save))
       args[index++] = strdup(i);
 
