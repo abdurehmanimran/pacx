@@ -355,6 +355,8 @@ void syncDBs() {
 
   freePackageList(&dbList);
 
-  if (strcmp(arguments[currentArg], "-Syu") == 0)
+  if (strcmp(arguments[currentArg], "-Syu") == 0) {
+    puts("");
     updatePackages();
+  }
 }
