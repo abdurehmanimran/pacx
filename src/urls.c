@@ -53,8 +53,7 @@ void fillURLPlaceholders(String **urls, packageAttr *attrs) {
   if (!urls || (*urls)->size == 0)
     return;
 
-  // replaceInString(urls, archBuff, attrs->arch);
-  replaceInString(urls, "$arch", "x86_64");
+  replaceInString(urls, "$arch", ARCHITECTURE);
   replaceInString(urls, "$repo", attrs->repo);
 }
 
