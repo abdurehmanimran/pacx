@@ -8,6 +8,7 @@
 #define UPDATE_INTERVAL "1"
 // Directory in which the downloaded packages will be placed
 #define DOWNLOAD_DIRECTORY "/usr/share/pacx/cache/"
+#define DB_DIRECTORY "/var/lib/pacman/sync/"
 
 void parseDetails(char *summary, packageInfo *package);
 void downloadPackage(packageInfo *packageInformation);
