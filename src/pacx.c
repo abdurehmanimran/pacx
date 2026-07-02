@@ -113,9 +113,8 @@ void calcTotalSpeed(packageInfoList *packageList, String **totalSpeed,
   *totalDownloaded = chooseUnit(downloadedInMBs);
 }
 
-// Level -> 2 For all
-// Level -> 1 To exclude totol stats
-// Level -> 0 For silent downloading
+// Level -> 2 To include total stats
+// Level -> 1 To exclude total stats
 void fetchPackages(packageInfoList *packageList, int level) {
   pthread_t *threads;
   double completedDownloaded = 0;
@@ -133,16 +132,6 @@ void fetchPackages(packageInfoList *packageList, int level) {
     insertPackage(packagesDownloading, packageList->packages[i]);
     pthread_create(&threads[i], NULL, startDownload,
                    packagesDownloading->packages[packagesDownloading->n - 1]);
-  }
-
-  if (level == 0) {
-    for (int i = 0; i < initThreads; i++)
-      pthread_join(threads[i], NULL);
-
-    free(threads);
-    freePackageList(packagesDownloading);
-    free(packagesDownloading);
-    return;
   }
 
   HIDE_CURSOR;
