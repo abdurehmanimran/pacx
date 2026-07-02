@@ -46,13 +46,22 @@ String *getMirrorListPath(packageAttr *attr) {
   char lineBuffer[128];
   memset(lineBuffer, 0, sizeof(lineBuffer));
 
+  // Go to [repoName]
   while (fgets(lineBuffer, sizeof(lineBuffer) - 1, pacmanConf) != NULL) {
     if (strstr(lineBuffer, repoName->str) == lineBuffer) {
-      fgets(lineBuffer, sizeof(lineBuffer) - 1, pacmanConf);
+      // fgets(lineBuffer, sizeof(lineBuffer) - 1, pacmanConf);
       break;
     }
     memset(lineBuffer, 0, sizeof(lineBuffer));
   }
+
+  // Go to the line of Include = .....
+  while (fgets(lineBuffer, sizeof(lineBuffer) - 1, pacmanConf) != NULL) {
+    if (strstr(lineBuffer, "Include"))
+      break;
+    memset(lineBuffer, 0, sizeof(lineBuffer));
+  }
+
   unsigned int newLineIndex = strcspn(lineBuffer, "\n");
   if (newLineIndex >= sizeof(lineBuffer) - 1)
     newLineIndex = sizeof(lineBuffer) - 1;
