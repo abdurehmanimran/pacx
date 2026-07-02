@@ -102,7 +102,7 @@ void downloadPackage(packageInfo *packageInformation) {
         "-s",
         "4",
         "-x",
-        "4",
+        "6",
         "--allow-overwrite",
         "--file-allocation",
         "none",
