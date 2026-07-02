@@ -1,4 +1,6 @@
 #include "packageattr.h"
+#include "colors.h"
+#include "str.h"
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -57,8 +59,14 @@ String *getMirrorListPath(packageAttr *attr) {
 
   // Go to the line of Include = .....
   while (fgets(lineBuffer, sizeof(lineBuffer) - 1, pacmanConf) != NULL) {
-    if (strstr(lineBuffer, "Include"))
+    if (strstr(lineBuffer, "[") == lineBuffer || feof(pacmanConf)) {
+      printf(RED "Error: " WHITE "failed to find the mirrorlist file !!\n");
+      freeString(repoName);
+      exit(1);
+    }
+    if (strstr(lineBuffer, "Include") == lineBuffer)
       break;
+
     memset(lineBuffer, 0, sizeof(lineBuffer));
   }
 
