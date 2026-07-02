@@ -15,8 +15,6 @@
 #include <string.h>
 #include <unistd.h>
 
-#define PARALLEL_DOWNLOADS 20
-
 Argument args[] = {{"-h", printHelp},        {"--help", printHelp},
                    {"-S", syncPackages},     {"-s", syncPackages},
                    {"--sync", syncPackages}, {"-Su", updatePackages},
@@ -55,6 +53,7 @@ int main(int argc, char **argv) {
         return 0;
       }
     }
+    printHelp(); // No other operation performed !!
   }
   // Argument Management End
   return 0;
@@ -350,7 +349,7 @@ void syncDBs() {
   packageInfoList dbList;
   createDBPackageList(&dbList);
 
-  printf(GREEN "::" WHITE " Syncronizing" GREEN " databases" WHITE " !!\n");
+  printf(GREEN "::" WHITE " Syncronizing" GREEN " databases" WHITE " !!\n\n");
   fetchPackages(&dbList, 1);
 
   freePackageList(&dbList);

@@ -3,13 +3,15 @@
 #ifndef PACX_H
 #define PACX_H
 
+#define VERSION "0.1.4"
+#define PARALLEL_DOWNLOADS 20
+
 typedef struct {
   char *arg;
   void (*operation)();
 } Argument;
 
 int isSudo();
-// void printHelp(int currentArg, char **argv);
 void syncPackages();
 void updatePackages();
 void syncDBs();

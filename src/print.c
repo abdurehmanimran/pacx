@@ -1,6 +1,7 @@
 #include "print.h"
 #include "colors.h"
 #include "packagelist.h"
+#include "pacx.h"
 #include "progress.h"
 #include "str.h"
 #include <stdio.h>
@@ -11,12 +12,16 @@
 
 void printHelp() {
   printf(GREEN "Pacx\t" RED "A Pacman Wrapper\n");
+  printf(GREEN "ver:\t" RED VERSION "\n");
   printf(GREEN "usage:\t" RED "pacx " WHITE "<operation> [...]\n");
   printf(GREEN "Operations:\n\t" WHITE);
   printf(RED "pacx " WHITE "{"
              "-S --sync" WHITE "}\n\t");
   printf(RED "pacx " WHITE "{-Su}\n\t");
+  printf(RED "pacx " WHITE "{-Syu}\n\t");
   printf(RED "pacx " WHITE "{-h --help}\n");
+  printf(GREEN "Note: " WHITE "Do not " RED "terminate " WHITE
+               "pacx while " GREEN "synchronizing databases " WHITE "!!\n");
 }
 
 int getTerminalWidth() {
@@ -79,7 +84,7 @@ void printDownloadInfo(packageInfo *package) {
              package->downloaded, calcColWidth(10) - 3, calcColWidth(10) - 4,
              package->speed);
       printf(GREEN);
-      printProgress(package->progress, calcColWidth(39) - 2);
+      printProgress(package->progress, calcColWidth(39) - 3);
       printf(WHITE "%3d%%\n", package->progress);
 
     } else { // For Smaller Terminal Widths
@@ -127,7 +132,7 @@ void printTotalStats(char *totalDownloaded, char *totalSpeed) {
     else
       printf(RED " %s " WHITE, totalSpeed);
     printf(GREEN);
-    printProgress(100, calcColWidth(39) - 1);
+    printProgress(100, calcColWidth(39) - 2);
   }
 
   printf("\n");
