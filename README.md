@@ -32,9 +32,11 @@ sudo make install-debug
 ```
 
 ## See It In Action
-<img width="1908" height="1022" alt="image" src="https://github.com/user-attachments/assets/35b55460-4c3b-4db9-8a4e-dd6f9b1a469c" />
+<img width="1908" height="1022" alt="image" src="https://github.com/user-attachments/assets/f473b809-84fd-408e-8533-a37c1ee63450" />
 
-<img width="1908" height="1022" alt="image" src="https://github.com/user-attachments/assets/3383b1fc-624e-4644-b495-1cd38be3472b" />
+<img width="1908" height="1022" alt="image" src="https://github.com/user-attachments/assets/17d790fe-ce55-4289-807d-31e71ad2b0c3" />
+
+<img width="1908" height="1022" alt="image" src="https://github.com/user-attachments/assets/7e54c870-7699-4102-bc60-b616411c1aa8" />
 
 ## Why C?
 Just so that I could learn and practice C.
