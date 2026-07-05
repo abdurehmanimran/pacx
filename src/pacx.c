@@ -20,9 +20,9 @@ Argument args[] = {{"-h", printHelp},        {"--help", printHelp},
                    {"--sync", syncPackages}, {"-Su", updatePackages},
                    {"-Sy", syncDBs},         {"-Syu", syncDBs}};
 
-int totalArgs;
 char **arguments;
-int currentArg;
+unsigned int totalArgs;
+unsigned int currentArg;
 
 packageInfoList packageList;
 
@@ -195,7 +195,34 @@ void getArgumentPackages(String **buffer) {
   currentArg++;
 
   while (currentArg < totalArgs) {
+    if (arguments[currentArg][0] == '-')
+      break;
+
     stringAppend(buffer, arguments[currentArg++]);
+    stringAppend(buffer, " ");
+  }
+}
+
+void getPackagesToIgnore(String **buffer) {
+  unsigned int index = currentArg;
+
+  while (strstr(arguments[index], "--ignore") == NULL) {
+    index++;
+    if (index >= totalArgs)
+      return;
+  }
+
+  index++;
+  if (index < totalArgs)
+    allocString(buffer, 1024);
+  else
+    return;
+
+  while (index < totalArgs) {
+    if (arguments[index][0] == '-')
+      break;
+
+    stringAppend(buffer, arguments[index++]);
     stringAppend(buffer, " ");
   }
 }
@@ -204,16 +231,28 @@ void getArgumentPackages(String **buffer) {
 char *getPackageNames(int toUpdate) {
   String *command;
   String *argumentPackages = NULL;
+  String *toIgnore = NULL;
+
+  getPackagesToIgnore(&toIgnore);
+
   String *packageNames;
 
-  if (toUpdate)
-    command = createString("pacman -Su --print-format %n");
-  else {
+  if (toUpdate) {
+    command = createString("pacman -Su --print-format %n ");
+    if (toIgnore) {
+      stringAppend(&command, "--ignore ");
+      stringCat(&command, toIgnore);
+    }
+  } else {
     command = createString("pacman -S ");
 
     getArgumentPackages(&argumentPackages);
     stringCat(&command, argumentPackages);
-    stringAppend(&command, " --print-format %n");
+    stringAppend(&command, " --print-format %n ");
+    if (toIgnore) {
+      stringAppend(&command, "--ignore ");
+      stringCat(&command, toIgnore);
+    }
   }
 
   FILE *process;
