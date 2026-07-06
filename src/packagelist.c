@@ -8,6 +8,7 @@
 
 void initPackageList(packageInfoList *packageList) {
   packageList->n = 0;
+  packageList->totalSize = 0;
   packageList->capacity = INIT_LIST_CAP;
   packageList->packages =
       (packageInfo **)malloc(sizeof(packageInfo *) * INIT_LIST_CAP);
@@ -15,7 +16,8 @@ void initPackageList(packageInfoList *packageList) {
     puts("Error: Failed to allocate memory for packageList");
 }
 
-int insertPackage(packageInfoList *packageList, packageInfo *package) {
+int insertPackage(packageInfoList *packageList, packageInfo *package,
+                  double size) {
   if (packageList->capacity <= packageList->n) {
     packageList->capacity += 128;
     packageInfo **tempPtr = realloc(
@@ -28,6 +30,7 @@ int insertPackage(packageInfoList *packageList, packageInfo *package) {
     }
   }
   packageList->n++;
+  packageList->totalSize += size;
   packageList->packages[packageList->n - 1] = package;
   return packageList->n;
 }

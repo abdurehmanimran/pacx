@@ -5,11 +5,13 @@
 typedef struct {
   int n;
   int capacity;
+  double totalSize;
   packageInfo **packages;
 } packageInfoList;
 
 void initPackageList(packageInfoList *packageList);
-int insertPackage(packageInfoList *packageList, packageInfo *package);
+int insertPackage(packageInfoList *packageList, packageInfo *package,
+                  double size);
 void freePackageList(packageInfoList *packageList);
 void retrievePackages(int argPosition, int totalArgs, char **argv,
                       packageInfoList *packageList);

@@ -146,4 +146,19 @@ void printDetails(packageInfoList *packageList) {
     printf(GREEN "[%d]:\t" WHITE "%s\n", i + 1,
            packageList->packages[i]->packageName);
   }
+  String *totalSize = chooseUnit(packageList->totalSize);
+  printf(GREEN ":: Total Download Size: " WHITE "%s\n", totalSize->str);
+  freeString(totalSize);
+}
+
+int askYesOrNo() {
+  char buff[12];
+  printf(GREEN ":: Do you want to continue? " WHITE "[Y/n] : ");
+  int stat = scanf("%10s", buff);
+
+  if (stat != 1) {
+    printf(RED "Error: " WHITE "invalid input given !!\n");
+    exit(1);
+  }
+  return buff[0] == 'y' || buff[0] == 'Y';
 }

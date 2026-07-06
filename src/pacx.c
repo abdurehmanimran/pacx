@@ -129,7 +129,8 @@ void fetchPackages(packageInfoList *packageList, int level) {
   threads = (pthread_t *)malloc(sizeof(pthread_t) * (initThreads));
 
   for (int i = 0; i < initThreads; i++) {
-    insertPackage(packagesDownloading, packageList->packages[i]);
+    insertPackage(packagesDownloading, packageList->packages[i],
+                  0); // Total size if not needed
     pthread_create(&threads[i], NULL, startDownload,
                    packagesDownloading->packages[packagesDownloading->n - 1]);
   }
@@ -144,7 +145,8 @@ void fetchPackages(packageInfoList *packageList, int level) {
                   &completedDownloaded);
         popPackage(packagesDownloading, packagesDownloading->packages[i]);
         if (index < packageList->n) {
-          insertPackage(packagesDownloading, packageList->packages[index++]);
+          insertPackage(packagesDownloading, packageList->packages[index++],
+                        0); // Total size if not needed
           pthread_create(
               &threads[i], NULL, startDownload,
               packagesDownloading->packages[packagesDownloading->n - 1]);
@@ -238,7 +240,7 @@ char *getPackageNames(int toUpdate) {
   String *packageNames;
 
   if (toUpdate) {
-    command = createString("pacman -Su --print-format %n ");
+    command = createString("pacman -Su --print-format '%n %s' ");
     if (toIgnore) {
       stringAppend(&command, "--ignore ");
       stringCat(&command, toIgnore);
@@ -248,7 +250,7 @@ char *getPackageNames(int toUpdate) {
 
     getArgumentPackages(&argumentPackages);
     stringCat(&command, argumentPackages);
-    stringAppend(&command, " --print-format %n ");
+    stringAppend(&command, " --print-format '%n %s' ");
     if (toIgnore) {
       stringAppend(&command, "--ignore ");
       stringCat(&command, toIgnore);
@@ -290,10 +292,27 @@ void createPackageList(packageInfoList *packageList, int toUpdate) {
   // Separates package names, creates packageInfo objects,
   // and inserts them into packageInfoList
   while (packageName != NULL) {
+    char *part, *namePtr;
+    part = strtok_r(packageName, " ", &namePtr);
+    if (!part) {
+      printf(GREEN "Error: " WHITE
+                   "Unable to separate packages from the list!!");
+      exit(1);
+    }
     packageInfo *package;
-    initPackageInfo(&package, packageName);
-    insertPackage(packageList, package);
+    initPackageInfo(&package, part);
 
+    part = strtok_r(NULL, " ", &namePtr);
+    if (!part)
+      exit(1);
+    double size = atof(part) / (1024 * 1024); // Bytes into MiBs
+
+    String *packageSize = chooseUnit(size);
+    free(package->totalSize); // Allocated while initPackageInfo()
+    package->totalSize = packageSize->str;
+    free(packageSize);
+
+    insertPackage(packageList, package, size);
     packageName = strtok(NULL, "\n"); // Get the next packageName
   }
 
@@ -325,6 +344,9 @@ void syncPackages() {
   // Setup the list of packages
   createPackageList(&packageList, 0);
   printDetails(&packageList);
+  if (!askYesOrNo()) {
+    exit(0);
+  }
   puts(""); // Add a new line for separation
 
   fetchPackages(&packageList, 2);
@@ -362,6 +384,9 @@ void updatePackages() {
   createPackageList(&packageList, 1);
 
   printDetails(&packageList);
+  if (!askYesOrNo()) {
+    exit(0);
+  }
   puts("");
 
   fetchPackages(&packageList, 2);

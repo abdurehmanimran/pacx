@@ -37,7 +37,7 @@ void createDBPackageList(packageInfoList *dbList) {
 
     packageInfo *db;
     initPackageInfo(&db, dbName->str);
-    insertPackage(dbList, db);
+    insertPackage(dbList, db, 0);
 
     if (dbName)
       freeString(dbName);

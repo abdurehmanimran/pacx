@@ -10,6 +10,8 @@
 int getTerminalWidth();
 int calcColWidth(int percentage);
 void printDetails(packageInfoList *packageList);
+int askYesOrNo();
+
 void printCompleted(packageInfo *package);
 void printDownloadInfo(packageInfo *package);
 void printTotalStats(char *totalDownloaded, char *totalSpeed);
