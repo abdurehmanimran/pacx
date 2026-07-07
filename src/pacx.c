@@ -43,8 +43,7 @@ int main(int argc, char **argv) {
     printHelp();
     return 0;
   } else {
-    // Iterating through the arguments
-    // To be Fixed !!! At this moment it only checks for the first argument
+    // Comparing the given opertaion with the Arguments array
     for (size_t i = 0; i < (sizeof(args) / sizeof(Argument)); i++) {
       if (strcmp(args[i].arg, argv[1]) == 0) {
         currentArg = 1;
