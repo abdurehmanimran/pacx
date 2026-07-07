@@ -76,6 +76,9 @@ String *getMirrorListPath(packageAttr *attr) {
 
   lineBuffer[newLineIndex] = '\0';
 
+  while (lineBuffer[strlen(lineBuffer) - 1] == ' ')
+    lineBuffer[strlen(lineBuffer) - 1] = '\0';
+
   path = createString(lineBuffer + 10);
 
   fclose(pacmanConf);
