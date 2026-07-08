@@ -214,7 +214,7 @@ void getPackagesToIgnore(String **buffer) {
   }
 
   index++;
-  if (index < totalArgs)
+  if (index < totalArgs) // Check if there is any package name after --ignore
     allocString(buffer, 1024);
   else
     return;
@@ -223,6 +223,7 @@ void getPackagesToIgnore(String **buffer) {
     if (arguments[index][0] == '-')
       break;
 
+    stringAppend(buffer, "--ignore ");
     stringAppend(buffer, arguments[index++]);
     stringAppend(buffer, " ");
   }
@@ -241,8 +242,8 @@ char *getPackageNames(int toUpdate) {
   if (toUpdate) {
     command = createString("pacman -Su --print-format '%n %s' ");
     if (toIgnore) {
-      stringAppend(&command, "--ignore ");
       stringCat(&command, toIgnore);
+      freeString(toIgnore);
     }
   } else {
     command = createString("pacman -S ");
@@ -251,8 +252,8 @@ char *getPackageNames(int toUpdate) {
     stringCat(&command, argumentPackages);
     stringAppend(&command, " --print-format '%n %s' ");
     if (toIgnore) {
-      stringAppend(&command, "--ignore ");
       stringCat(&command, toIgnore);
+      freeString(toIgnore);
     }
   }
 
