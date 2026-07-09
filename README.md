@@ -1,7 +1,7 @@
 # Pacx
-A simple blazing-fast Pacman wrapper inspired by **Powerpill** and **Nala** that makes package management feel effortless and enjoyable.
-
-This lightweight wrapper brings the speed of parallel downloads to your Arch Linux system using `aria2c`, while keeping things simple and elegant and having a beautiful and intuitive interface inspired by **Nala**
+A simple blazing-fast Pacman wrapper inspired by **Powerpill** and **Nala** that makes package downloads fancier and faster by:
+- Downloading a single package from *multiple mirrors* at the same time,
+- And, utilizing *parallel downloading* of `aria2c`.
 
 ## Installation
 The package can be directly installed through any AUR helper:
