@@ -400,6 +400,7 @@ void updatePackages() {
 
 void syncDBs() {
   packageInfoList dbList;
+  initPackageList(&dbList);
   createDBPackageList(&dbList);
 
   printf(GREEN "::" WHITE " Syncronizing" GREEN " databases" WHITE " !!\n\n");
