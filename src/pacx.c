@@ -23,6 +23,7 @@ Argument args[] = {{"-h", printHelp},        {"--help", printHelp},
 char **arguments;
 unsigned int totalArgs;
 unsigned int currentArg;
+String *pacmanCommand = NULL;
 
 packageInfoList packageList;
 
@@ -188,18 +189,18 @@ cleanup:
 }
 
 void getArgumentPackages(String **buffer) {
+  int index = currentArg;
   allocString(buffer, 1024);
-  currentArg++;
+  index++;
 
-  stringAppend(buffer, arguments[currentArg]);
+  stringAppend(buffer, arguments[index++]);
   stringAppend(buffer, " ");
-  currentArg++;
 
-  while (currentArg < totalArgs) {
-    if (arguments[currentArg][0] == '-')
+  while (index < totalArgs) {
+    if (arguments[index][0] == '-')
       break;
 
-    stringAppend(buffer, arguments[currentArg++]);
+    stringAppend(buffer, arguments[index++]);
     stringAppend(buffer, " ");
   }
 }
@@ -230,8 +231,7 @@ void getPackagesToIgnore(String **buffer) {
 }
 
 // Returns a malloced list of packages each on a separate line
-char *getPackageNames(int toUpdate) {
-  String *command;
+char *getPackageNames(int toUpdate, String **command) {
   String *argumentPackages = NULL;
   String *toIgnore = NULL;
 
@@ -240,25 +240,25 @@ char *getPackageNames(int toUpdate) {
   String *packageNames;
 
   if (toUpdate) {
-    command = createString("pacman -Su --print-format '%n %s' ");
+    *command = createString("pacman -Su --print-format '%n %s' ");
     if (toIgnore) {
-      stringCat(&command, toIgnore);
+      stringCat(command, toIgnore);
       freeString(toIgnore);
     }
   } else {
-    command = createString("pacman -S ");
+    *command = createString("pacman -S ");
 
     getArgumentPackages(&argumentPackages);
-    stringCat(&command, argumentPackages);
-    stringAppend(&command, " --print-format '%n %s' ");
+    stringCat(command, argumentPackages);
+    stringAppend(command, " --print-format '%n %s' ");
     if (toIgnore) {
-      stringCat(&command, toIgnore);
+      stringCat(command, toIgnore);
       freeString(toIgnore);
     }
   }
 
   FILE *process;
-  if ((process = popen(command->str, "r")) == NULL) {
+  if ((process = popen((*command)->str, "r")) == NULL) {
     puts(GREEN "Error:" WHITE " Failed to run pacman!!");
     exit(1);
   }
@@ -271,7 +271,6 @@ char *getPackageNames(int toUpdate) {
 
   char *returnStr = strdup(packageNames->str);
 
-  freeString(command);
   if (argumentPackages != NULL)
     freeString(argumentPackages);
   freeString(packageNames);
@@ -280,7 +279,7 @@ char *getPackageNames(int toUpdate) {
 }
 
 void createPackageList(packageInfoList *packageList, int toUpdate) {
-  char *packageNames = getPackageNames(toUpdate);
+  char *packageNames = getPackageNames(toUpdate, &pacmanCommand);
   initPackageList(packageList);
 
   char *packageName = strtok(packageNames, "\n");
@@ -354,25 +353,12 @@ void syncPackages() {
   movePackages();
   freePackageList(&packageList);
 
-  String *argumentPackages;
-  currentArg = 1;
-  getArgumentPackages(&argumentPackages);
+  // Making args array
+  replaceInString(&pacmanCommand, "--print-format '%n %s'", " ");
+  replaceInString(&pacmanCommand, "   ", "");
 
-  int packages = totalArgs - 2;
-
-  char **pacmanArgs = (char **)malloc(sizeof(char *) * (packages + 3));
-  pacmanArgs[0] = "pacman";
-  pacmanArgs[1] = "-S";
-  pacmanArgs[packages + 2] = NULL;
-
-  char *package = strtok(argumentPackages->str, " ");
-  if (package != NULL)
-    pacmanArgs[2] = package;
-
-  for (int i = 1; i < packages; i++) {
-    package = strtok(NULL, " ");
-    pacmanArgs[i + 2] = package;
-  }
+  char **pacmanArgs = strToArray(pacmanCommand->str);
+  freeString(pacmanCommand); // No need for pacmanCommand now
 
   execvp(pacmanArgs[0], pacmanArgs);
 }
@@ -394,7 +380,13 @@ void updatePackages() {
   movePackages();
   freePackageList(&packageList);
 
-  char *pacmanArgs[] = {"pacman", "-Su", NULL};
+  // Making args array
+  replaceInString(&pacmanCommand, "--print-format '%n %s'", " ");
+  replaceInString(&pacmanCommand, "   ", "");
+
+  char **pacmanArgs = strToArray(pacmanCommand->str);
+  freeString(pacmanCommand); // No need for pacmanCommand now
+
   execvp(pacmanArgs[0], pacmanArgs);
 }
 
