@@ -354,6 +354,7 @@ void syncPackages() {
   freePackageList(&packageList);
 
   // Making args array
+  stringAppend(&pacmanCommand, " --color always");
   replaceInString(&pacmanCommand, "--print-format '%n %s'", " ");
   replaceInString(&pacmanCommand, "   ", "");
 
@@ -381,6 +382,7 @@ void updatePackages() {
   freePackageList(&packageList);
 
   // Making args array
+  stringAppend(&pacmanCommand, " --color always");
   replaceInString(&pacmanCommand, "--print-format '%n %s'", " ");
   replaceInString(&pacmanCommand, "   ", "");
 
