@@ -94,35 +94,18 @@ void downloadPackage(packageInfo *packageInformation) {
     dup2(processPipe[1], 2); // Piping stderr
     close(processPipe[1]);
 
-    // Executing aria2c
-    char *args[20] = {
-        "aria2c",
-        "--continue",
-        "--optimize-concurrent-downloads",
-        "-s",
-        "4",
-        "-x",
-        "6",
-        "--allow-overwrite",
-        "--file-allocation",
-        "none",
-        "--summary-interval",
-        UPDATE_INTERVAL,
-    };
+    String *aria2cCommand =
+        createString("aria2c --continue --optimize-concurrent-downloads -s 5 "
+                     "-x 10 --allow-overwrite --file-allocation none "
+                     "--summary-interval " UPDATE_INTERVAL " ");
+    stringCat(&aria2cCommand, urls);
+    stringAppend(&aria2cCommand, " -d ");
+    stringAppend(&aria2cCommand, packageInformation->isRepo
+                                     ? DB_DIRECTORY
+                                     : DOWNLOAD_DIRECTORY);
 
-    args[17] = "-d";
-    if (packageInformation->isRepo)
-      args[18] = DB_DIRECTORY;
-    else
-      args[18] = DOWNLOAD_DIRECTORY;
-    args[19] = NULL;
-
-    char *i, *save;
-    int index = 12;
-
-    for (i = strtok_r(urls->str, " ", &save); i && index < 17;
-         i = strtok_r(NULL, " ", &save))
-      args[index++] = strdup(i);
+    char **args = strToArray(aria2cCommand->str);
+    freeString(aria2cCommand);
 
     execvp(args[0], args);
   } else if (processPID > 0) { // Parent Process
