@@ -128,6 +128,40 @@ String *getOutput(FILE *stream) {
   return output;
 }
 
+char **strToArray(char *str) {
+  char **arr = NULL; // Will be allocated after size calculation
+  int end = strlen(str) - 1;
+  while (str[end] == ' ') {
+    str[end] = 0;
+    end--;
+  }
+
+  char *i = strstr(str, " ");
+  int spaceCount = 0;
+
+  while (i) {
+    spaceCount++;
+    i++; // Move from space to next char
+    i = strstr(i, " ");
+  }
+
+  // spaceCount + 2 -> one for NULL and one for the last word after space
+  arr = malloc(sizeof(char *) * (spaceCount + 2));
+
+  char *tok, *tokPtr;
+  tok = strtok_r(str, " ", &tokPtr);
+  int index = 0;
+
+  while (tok != NULL) {
+    arr[index++] = strdup(tok);
+    tok = strtok_r(NULL, " ", &tokPtr);
+  }
+
+  arr[index] = NULL;
+
+  return arr;
+}
+
 void freeString(String *ptr) {
   if (ptr) {
     if (ptr->str)
