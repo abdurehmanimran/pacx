@@ -393,6 +393,9 @@ void updatePackages() {
 }
 
 void syncDBs() {
+  if (!isSudo())
+    exit(1);
+
   packageInfoList dbList;
   initPackageList(&dbList);
   createDBPackageList(&dbList);

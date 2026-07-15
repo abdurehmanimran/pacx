@@ -45,7 +45,7 @@ int calcColWidth(int percentage) {
 String *getName(char *packageName) {
   String *name = NULL;
   // printf("\x1B[K"); // Clear line
-  if (strstr(packageName, ".")) {
+  if (strstr(packageName, ".db")) {
     name = createString(":: ");
     char *dup = strdup(packageName);
     dup[strcspn(dup, ".")] = 0;
