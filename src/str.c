@@ -79,7 +79,8 @@ void replaceInString(String **str, char *find, char *replace) {
       found = 0;
 
     if (found) {
-      while (offset + (*str)->size > (*str)->capacity)
+      // Adding 1 to account for the NULL char
+      while (offset + (*str)->size + 1 > (*str)->capacity)
         expandStringCap(str);
 
       // Slide to the right starting from the end

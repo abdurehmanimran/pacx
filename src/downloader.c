@@ -96,7 +96,7 @@ void downloadPackage(packageInfo *packageInformation) {
 
     String *aria2cCommand =
         createString("aria2c --continue --optimize-concurrent-downloads -s 5 "
-                     "-x 10 --allow-overwrite --file-allocation none "
+                     "-x 8 --allow-overwrite --file-allocation none "
                      "--summary-interval " UPDATE_INTERVAL " ");
     stringCat(&aria2cCommand, urls);
     stringAppend(&aria2cCommand, " -d ");

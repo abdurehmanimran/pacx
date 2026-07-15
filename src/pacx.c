@@ -189,7 +189,7 @@ cleanup:
 }
 
 void getArgumentPackages(String **buffer) {
-  int index = currentArg;
+  unsigned int index = currentArg;
   allocString(buffer, 1024);
   index++;
 
