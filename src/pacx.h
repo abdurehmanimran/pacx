@@ -5,7 +5,7 @@
 #include "packagelist.h"
 #include "str.h"
 
-#define VERSION "0.1.4"
+#define VERSION "0.1.5"
 #define PARALLEL_DOWNLOADS 20
 
 typedef struct {
