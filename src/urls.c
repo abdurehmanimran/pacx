@@ -279,37 +279,3 @@ String *getUrls(mirrorTable *table, char *packageName) {
   }
   return urls;
 }
-
-#ifdef MIRROR_TABLE_D
-
-int main() {
-  packageInfoList dbList;
-  initPackageList(&dbList);
-  createDBPackageList(&dbList);
-
-  mirrorTable *repoTable;
-  createMirrorTable(&dbList, &repoTable);
-
-  for (unsigned int i = 0; i < repoTable->n; i++) {
-    puts("__________________________");
-    printf("[%u] -> Name : %s\n", i, repoTable->repos[i]->repoName->str);
-    printf("Urls -> %s\n", repoTable->repos[i]->mirrorUrls->str);
-    puts("__________________________");
-  }
-
-  puts("______Examples________");
-  String *example1 = getUrls(repoTable, "fastfetch");
-  printf("Package -> %s\nUrls -> %s\n", "fastfetch", example1->str);
-  freeString(example1);
-
-  puts("______Examples________");
-  String *example2 = getUrls(repoTable, dbList.packages[2]->packageName);
-  printf("Package -> %s\nUrls -> %s\n", "cachyos.dbz", example2->str);
-  freeString(example2);
-
-  freePackageList(&dbList);
-  freeTable(repoTable);
-  return 0;
-}
-
-#endif

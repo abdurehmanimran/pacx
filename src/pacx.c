@@ -38,7 +38,6 @@ int isSudo() {
   return 1;
 }
 
-#ifndef MIRROR_TABLE_D
 int main(int argc, char **argv) {
 
   totalArgs = argc;
@@ -61,7 +60,6 @@ int main(int argc, char **argv) {
   // Argument Management End
   return 0;
 }
-#endif
 
 void addAmount(const char *amount, double *total) {
 
