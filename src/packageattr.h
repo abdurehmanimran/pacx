@@ -14,6 +14,8 @@ typedef struct {
 
 packageAttr *initPackageAttr();
 void freePackageAttr(packageAttr *pkgAttr);
+
+packageAttr *getPackageAttr(char *package);
 String *getMirrorListPath(packageAttr *attr);
 
 #endif

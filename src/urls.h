@@ -18,7 +18,6 @@ typedef struct {
 
 String *getRawMirrors(char *path, packageAttr *attrs);
 void fillURLPlaceholders(String **urls, packageAttr *attrs);
-packageAttr *getPackageAttr(char *package);
 String *getUrls(mirrorTable *table, char *packageName);
 void createMirrorTable(packageInfoList *dbList, mirrorTable **table);
 

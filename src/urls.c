@@ -59,66 +59,6 @@ void fillURLPlaceholders(String **urls, packageAttr *attrs) {
   replaceInString(urls, "$repo", attrs->repo);
 }
 
-packageAttr *getPackageAttr(char *package) {
-  packageAttr *pkgAttr = initPackageAttr();
-  FILE *process;
-  String *pacmanOut = NULL; // getOutput allocates memory itself
-  String *command = NULL;
-
-  if (package != NULL) { // When package name is provided
-    command = createString("pacman -Sddp ");
-    stringAppend(&command, package);
-    stringAppend(&command, " --print-format \"%r %f %l\"");
-  } else {
-    printf(RED "Error: " WHITE "Package Name is NULL!!");
-    goto nullCleanUp;
-  }
-
-  if ((process = popen(command->str, "r")) == NULL) {
-    printf("Failed to get URL");
-    goto nullCleanUp;
-  }
-
-  if ((pacmanOut = getOutput(process)) == NULL) {
-    printf(RED "Error:" WHITE " No URL found for the package: %s\n", package);
-    pclose(process);
-    goto nullCleanUp;
-  }
-  pclose(process);
-
-  // Pattern: Repo FileName URL
-  char *i, *save;
-  i = strtok_r(pacmanOut->str, " ", &save);
-  if (!i)
-    goto nullCleanUp;
-  pkgAttr->repo = strdup(i);
-
-  i = strtok_r(NULL, " ", &save);
-  if (!i)
-    goto nullCleanUp;
-  pkgAttr->fileName = strdup(i);
-
-  i = strtok_r(NULL, " ", &save);
-  if (!i)
-    goto nullCleanUp;
-  i[strcspn(i, "\n")] = 0;
-  pkgAttr->url = strdup(i);
-
-cleanup:
-  if (command)
-    freeString(command);
-  if (pacmanOut) {
-    freeString(pacmanOut);
-  }
-  return pkgAttr;
-
-nullCleanUp:
-  if (pkgAttr)
-    free(pkgAttr);
-  pkgAttr = NULL;
-  goto cleanup;
-}
-
 mirrorTable *initMirrorTable() {
   mirrorTable *table = (mirrorTable *)malloc(sizeof(mirrorTable));
   if (!table) {
