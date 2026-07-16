@@ -1,7 +1,6 @@
 #include "db.h"
 #include "packageattr.h"
 #include "str.h"
-#include "urls.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -44,33 +43,4 @@ void createDBPackageList(packageInfoList *dbList) {
   }
 
   fclose(pacmanConf);
-}
-
-String *getRepoMirrors(char *name) {
-  String *mirrors = NULL;
-  String *listPath = NULL;
-  packageAttr *pkgAttr = initPackageAttr();
-  char repoName[24];
-  memset(repoName, 0, sizeof(repoName));
-  strncpy(repoName, name, sizeof(repoName));
-
-  repoName[strcspn(repoName, ".")] = 0;
-
-  pkgAttr->fileName = strdup(name);
-  pkgAttr->repo = strdup(repoName);
-  pkgAttr->url = strdup("repo");
-
-  listPath = getMirrorListPath(pkgAttr);
-  if (!listPath)
-    goto cleanup;
-
-  mirrors = getRawMirrors(listPath->str, pkgAttr);
-
-cleanup:
-  if (pkgAttr != NULL)
-    freePackageAttr(pkgAttr);
-  if (listPath != NULL)
-    freeString(listPath);
-
-  return mirrors;
 }

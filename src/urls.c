@@ -119,35 +119,6 @@ nullCleanUp:
   goto cleanup;
 }
 
-String *getMirrors(char *package) {
-  String *mirrors = NULL;
-  packageAttr *pkgAttr = NULL;
-  String *listPath = NULL;
-
-  pkgAttr = getPackageAttr(package);
-  if (!pkgAttr)
-    goto cleanup;
-
-  if (strstr(pkgAttr->url, "file://")) {
-    mirrors = createString("file");
-    goto cleanup;
-  }
-
-  listPath = getMirrorListPath(pkgAttr);
-  if (!listPath)
-    goto cleanup;
-
-  mirrors = getRawMirrors(listPath->str, pkgAttr);
-
-cleanup:
-  if (pkgAttr != NULL)
-    freePackageAttr(pkgAttr);
-  if (listPath != NULL)
-    freeString(listPath);
-
-  return mirrors;
-}
-
 mirrorTable *initMirrorTable() {
   mirrorTable *table = (mirrorTable *)malloc(sizeof(mirrorTable));
   if (!table) {

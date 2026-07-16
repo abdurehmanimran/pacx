@@ -5,6 +5,5 @@
 #include "packagelist.h"
 
 void createDBPackageList(packageInfoList *dbList);
-String *getRepoMirrors(char *name);
 
 #endif // !DB_H
