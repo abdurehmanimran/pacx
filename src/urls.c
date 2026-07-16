@@ -1,7 +1,9 @@
 #include "urls.h"
 #include "colors.h"
 #include "packageattr.h"
+#include "packagelist.h"
 #include "str.h"
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -145,3 +147,169 @@ cleanup:
 
   return mirrors;
 }
+
+mirrorTable *initMirrorTable() {
+  mirrorTable *table = (mirrorTable *)malloc(sizeof(mirrorTable));
+  if (!table) {
+    printf(RED "Error: " WHITE
+               "failed to allocate memory for mirrorTable !!\n");
+    exit(1);
+  }
+
+  table->n = 0;
+  table->capacity = 8;
+  table->repos = (repoURLs **)malloc(sizeof(repoURLs *) * table->capacity);
+
+  if (!table->repos) {
+    printf(RED "Error: " WHITE
+               "failed to allocate memory for mirrorTable's repoList !!\n");
+    free(table);
+    exit(1);
+  }
+
+  return table;
+}
+
+// Also reposible for freeing the repoURLs inside it
+void freeTable(mirrorTable *table) {
+
+  for (unsigned int i = 0; i < table->n; i++) {
+    freeString(table->repos[i]->repoName);
+    freeString(table->repos[i]->mirrorUrls);
+    free(table->repos[i]);
+  }
+
+  if (table->repos)
+    free(table->repos);
+
+  if (table)
+    free(table);
+}
+
+void expandTable(mirrorTable **table) {
+  (*table)->capacity += 8;
+
+  repoURLs **temp =
+      realloc((*table)->repos, sizeof(repoURLs *) * (*table)->capacity);
+
+  if (!temp) {
+    printf(RED "Error: " WHITE "failed to expand mirrorTable's repoList !!\n");
+    freeTable(*table);
+    exit(1);
+  }
+
+  (*table)->repos = temp;
+}
+
+void addRepoInTable(mirrorTable **table, String *name, String *mirrors) {
+  repoURLs *repoEntry = (repoURLs *)malloc(sizeof(repoURLs));
+  repoEntry->repoName = name; // Already allocated
+  repoEntry->mirrorUrls = mirrors;
+
+  while ((*table)->n + 1 > (*table)->capacity)
+    expandTable(table);
+
+  (*table)->repos[(*table)->n] = repoEntry;
+  (*table)->n++;
+}
+
+void createMirrorTable(packageInfoList *dbList, mirrorTable **table) {
+  *table = initMirrorTable();
+
+  for (unsigned int i = 0; i < dbList->n; i++) {
+    packageAttr *attrs = initPackageAttr();
+
+    String *repoName = createString(dbList->packages[i]->packageName);
+    replaceInString(&repoName, ".db", "\0");
+
+    attrs->fileName = strdup("${name}$");
+    attrs->repo = strdup(repoName->str);
+    attrs->url = strdup("repo");
+    freeString(repoName);
+
+    String *mirrorListPath = getMirrorListPath(attrs);
+    String *name = createString(attrs->repo);
+    String *urls = getRawMirrors(mirrorListPath->str, attrs);
+
+    addRepoInTable(table, name, urls);
+
+    // Cleanup
+    // name & urls will be freed by the func dealing with mirrorTable
+    freeString(mirrorListPath);
+    freePackageAttr(attrs);
+  }
+}
+
+String *getUrls(mirrorTable *table, char *packageName) {
+  String *urls = NULL;
+  packageAttr *attrs = NULL;
+  if (strstr(packageName, ".db") == NULL)
+    attrs = getPackageAttr(packageName);
+  else {
+    attrs = initPackageAttr();
+    String *repoName = createString(packageName);
+    replaceInString(&repoName, ".db", "\0");
+
+    attrs->fileName = strdup(packageName);
+    attrs->repo = strdup(repoName->str);
+    attrs->url = strdup("repo");
+    freeString(repoName);
+  }
+
+  for (unsigned i = 0; i < table->n; i++)
+    if (strcmp(table->repos[i]->repoName->str, attrs->repo) == 0) {
+      if (strstr(attrs->url, "file")) {
+        urls = createString("file");
+        break;
+      }
+
+      urls = createString(table->repos[i]->mirrorUrls->str);
+      replaceInString(&urls, "${name}$", attrs->fileName);
+
+      break;
+    }
+
+  if (attrs)
+    freePackageAttr(attrs);
+  if (!urls) {
+    printf(RED
+           "Error: " WHITE
+           "nothing matched in the mirror table for this package or repo !!\n");
+    exit(1);
+  }
+  return urls;
+}
+
+#ifdef MIRROR_TABLE_D
+
+int main() {
+  packageInfoList dbList;
+  initPackageList(&dbList);
+  createDBPackageList(&dbList);
+
+  mirrorTable *repoTable;
+  createMirrorTable(&dbList, &repoTable);
+
+  for (unsigned int i = 0; i < repoTable->n; i++) {
+    puts("__________________________");
+    printf("[%u] -> Name : %s\n", i, repoTable->repos[i]->repoName->str);
+    printf("Urls -> %s\n", repoTable->repos[i]->mirrorUrls->str);
+    puts("__________________________");
+  }
+
+  puts("______Examples________");
+  String *example1 = getUrls(repoTable, "fastfetch");
+  printf("Package -> %s\nUrls -> %s\n", "fastfetch", example1->str);
+  freeString(example1);
+
+  puts("______Examples________");
+  String *example2 = getUrls(repoTable, dbList.packages[2]->packageName);
+  printf("Package -> %s\nUrls -> %s\n", "cachyos.dbz", example2->str);
+  freeString(example2);
+
+  freePackageList(&dbList);
+  freeTable(repoTable);
+  return 0;
+}
+
+#endif

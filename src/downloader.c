@@ -1,10 +1,9 @@
 #include "downloader.h"
-#include "colors.h"
-#include "db.h"
 #include "packageinfo.h"
 #include "packagelist.h"
 #include "str.h"
 #include "urls.h"
+
 #include <pthread.h>
 #include <signal.h>
 #include <stdio.h>
@@ -12,6 +11,8 @@
 #include <string.h>
 #include <sys/wait.h>
 #include <unistd.h>
+
+extern mirrorTable *repoTable;
 
 void parseDetails(char *summary, packageInfo *package) {
   if (strstr(summary, "DL:") == NULL || strstr(summary, "ETA:") == NULL)
@@ -58,19 +59,14 @@ void parseDetails(char *summary, packageInfo *package) {
 }
 
 void downloadPackage(packageInfo *packageInformation) {
-  String *urls = NULL;
+  String *urls = getUrls(repoTable, packageInformation->packageName);
+
+  // Removing the prev db files
   if (packageInformation->isRepo) {
     String *fullpath = createString(DB_DIRECTORY "/");
     stringAppend(&fullpath, packageInformation->packageName);
     remove(fullpath->str);
     freeString(fullpath);
-    urls = getRepoMirrors(packageInformation->packageName);
-  } else
-    urls = getMirrors(packageInformation->packageName);
-
-  if (!urls) {
-    printf(RED "Error:" WHITE " failed to fetch the url !!\n");
-    return;
   }
 
   // getMirrors returns only "file" when the package is already present in

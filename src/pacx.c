@@ -9,6 +9,7 @@
 #include "packagelist.h"
 #include "print.h"
 #include "str.h"
+#include "urls.h"
 #include <pthread.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -24,6 +25,7 @@ char **arguments;
 unsigned int totalArgs;
 unsigned int currentArg;
 String *pacmanCommand = NULL;
+mirrorTable *repoTable = NULL;
 
 packageInfoList packageList;
 
@@ -36,6 +38,7 @@ int isSudo() {
   return 1;
 }
 
+#ifndef MIRROR_TABLE_D
 int main(int argc, char **argv) {
 
   totalArgs = argc;
@@ -58,6 +61,7 @@ int main(int argc, char **argv) {
   // Argument Management End
   return 0;
 }
+#endif
 
 void addAmount(const char *amount, double *total) {
 
@@ -348,6 +352,13 @@ void syncPackages() {
   }
   puts(""); // Add a new line for separation
 
+  if (repoTable == NULL) {
+    packageInfoList dbList;
+    initPackageList(&dbList);
+    createDBPackageList(&dbList);
+    createMirrorTable(&dbList, &repoTable);
+  }
+
   fetchPackages(&packageList, 2);
 
   movePackages();
@@ -376,6 +387,13 @@ void updatePackages() {
   }
   puts("");
 
+  if (repoTable == NULL) {
+    packageInfoList dbList;
+    initPackageList(&dbList);
+    createDBPackageList(&dbList);
+    createMirrorTable(&dbList, &repoTable);
+  }
+
   fetchPackages(&packageList, 2);
 
   movePackages();
@@ -400,6 +418,7 @@ void syncDBs() {
   initPackageList(&dbList);
   createDBPackageList(&dbList);
 
+  createMirrorTable(&dbList, &repoTable);
   printf(GREEN "::" WHITE " Syncronizing" GREEN " databases" WHITE " !!\n\n");
   fetchPackages(&dbList, 1);
 
