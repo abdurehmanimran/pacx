@@ -1,5 +1,5 @@
 # Pacx
-A simple blazing-fast Pacman wrapper inspired by **Powerpill** and **Nala** that makes package downloads fancier and faster by:
+Pacx *— read as "packs" —* is a simple blazing-fast Pacman wrapper inspired by **Powerpill** and **Nala** that makes package downloads fancier and faster by:
 - Downloading a single package from *multiple mirrors* at the same time,
 - And, utilizing *parallel downloading* of `aria2c`.
 
