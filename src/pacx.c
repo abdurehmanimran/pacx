@@ -308,11 +308,6 @@ void createPackageList(packageInfoList *packageList, int toUpdate) {
       exit(1);
     double size = atof(part) / (1024 * 1024); // Bytes into MiBs
 
-    String *packageSize = chooseUnit(size);
-    free(package->totalSize); // Allocated while initPackageInfo()
-    package->totalSize = packageSize->str;
-    free(packageSize);
-
     insertPackage(packageList, package, size);
     packageName = strtok(NULL, "\n"); // Get the next packageName
   }
@@ -330,12 +325,26 @@ void execute(char **args) {
 }
 
 void movePackages() {
-  char *mvArgs[] = {"sh", "-c",
-                    "mv /usr/share/pacx/cache/* /var/cache/pacman/pkg/", NULL};
+  char *mvArgs[4] = {"sh", "-c"};
+  mvArgs[3] = NULL;
+
+  // Creating the mv command
+  String *moveArguments = createString("mv ");
+
+  for (int i = 0; i < packageList.n; i++) {
+    stringAppend(&moveArguments, DOWNLOAD_DIRECTORY);
+    stringAppend(&moveArguments, packageList.packages[i]->packageName);
+    stringAppend(&moveArguments, "* ");
+  }
+  stringAppend(&moveArguments, "/var/cache/pacman/pkg/");
+  mvArgs[2] = moveArguments->str;
+
   execute(mvArgs);
   printf(GREEN "::" WHITE " Successfully moved " GREEN "%d" WHITE
                " packages!!\n",
          packageList.n);
+
+  freeString(moveArguments);
 }
 
 void syncPackages() {

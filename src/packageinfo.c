@@ -8,7 +8,6 @@ void initPackageInfo(packageInfo **package, char *name) {
   (*package)->packageName = strdup(name);
   (*package)->downloaded = strdup("0B");
   (*package)->speed = strdup("0B");
-  (*package)->totalSize = strdup("0B");
   (*package)->progress = 0;
   (*package)->downloadStarted = 0;
   (*package)->notFinished = 1;
@@ -23,7 +22,6 @@ void freePackageInfo(packageInfo **package) {
   free((*package)->packageName);
   free((*package)->downloaded);
   free((*package)->speed);
-  free((*package)->totalSize);
   free(*package);
 }
 
@@ -36,11 +34,6 @@ void changePackageInfo(packageInfo *package, int opt, char *newValue) {
     free(temp);
     break;
   case 2:
-    temp = package->totalSize;
-    package->totalSize = newValue;
-    free(temp);
-    break;
-  case 3:
     temp = package->speed;
     package->speed = newValue;
     free(temp);

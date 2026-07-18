@@ -37,9 +37,6 @@ void parseDetails(char *summary, packageInfo *package) {
       char *paranthesisPtr;
       char *smallerSubToken = strtok_r(subToken, "(", &paranthesisPtr);
 
-      if (smallerSubToken != NULL)
-        changePackageInfo(package, 2, strdup(smallerSubToken));
-
       smallerSubToken = strtok_r(NULL, "(", &paranthesisPtr);
       if (smallerSubToken != NULL)
         package->progress = atoi(smallerSubToken);
@@ -55,7 +52,7 @@ void parseDetails(char *summary, packageInfo *package) {
     token++;
   token++;
 
-  changePackageInfo(package, 3, strdup(token));
+  changePackageInfo(package, 2, strdup(token));
 }
 
 void downloadPackage(packageInfo *packageInformation) {

@@ -78,7 +78,7 @@ void printDownloadInfo(packageInfo *package) {
   String *name = getName(package->packageName);
 
   if (package->packageName != NULL && package->speed != NULL &&
-      package->downloaded != NULL && package->totalSize != NULL) {
+      package->downloaded != NULL) {
 
     if (getTerminalWidth() >= 110) { // For Normal Terminal Widths
       printf(GREEN "%-*.*s" WHITE "%*.*s%*.*s/s ", calcColWidth(43),

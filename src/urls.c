@@ -127,7 +127,7 @@ void addRepoInTable(mirrorTable **table, String *name, String *mirrors) {
 void createMirrorTable(packageInfoList *dbList, mirrorTable **table) {
   *table = initMirrorTable();
 
-  for (unsigned int i = 0; i < dbList->n; i++) {
+  for (int i = 0; i < dbList->n; i++) {
     packageAttr *attrs = initPackageAttr();
 
     String *repoName = createString(dbList->packages[i]->packageName);
@@ -169,7 +169,7 @@ String *getUrls(mirrorTable *table, char *packageName) {
 
   for (unsigned i = 0; i < table->n; i++)
     if (strcmp(table->repos[i]->repoName->str, attrs->repo) == 0) {
-      if (strstr(attrs->url, "file")) {
+      if (strstr(attrs->url, "file:///")) {
         urls = createString("file");
         break;
       }

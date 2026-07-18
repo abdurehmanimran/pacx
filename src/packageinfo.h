@@ -4,9 +4,7 @@
 typedef struct {
   char *packageName;
   char *downloaded;
-  char *totalSize;
   char *speed;
-  //  char *url; // getUrl func moved to downloader
   int progress;
   int notFinished;
   int downloadStarted;
