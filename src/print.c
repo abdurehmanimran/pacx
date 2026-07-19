@@ -61,14 +61,10 @@ void printCompleted(packageInfo *package) {
   String *name = getName(package->packageName);
 
   printf("\x1B[K"); // Clear line
-  if (getTerminalWidth() >= 110)
-    printf(GREEN "%-*s"
-                 "%s\n",
-           calcColWidth(60), name->str, RED "::" WHITE " Download Completed!!");
-  else
-    printf(GREEN "%-*s"
-                 "%s\n",
-           calcColWidth(50), name->str, RED "::" WHITE " Download Completed!!");
+  const int nameIndent = calcColWidth(getTerminalWidth() >= 110 ? 60 : 64);
+  printf(GREEN "%-*s"
+               "%s\n",
+         nameIndent, name->str, RED "::" WHITE " Download Completed!!");
 
   if (name)
     freeString(name);
@@ -77,30 +73,24 @@ void printCompleted(packageInfo *package) {
 void printDownloadInfo(packageInfo *package) {
   String *name = getName(package->packageName);
 
-  if (package->packageName != NULL && package->speed != NULL &&
-      package->downloaded != NULL) {
-
-    if (getTerminalWidth() >= 110) { // For Normal Terminal Widths
-      printf(GREEN "%-*.*s" WHITE "%*.*s%*.*s/s ", calcColWidth(43),
-             calcColWidth(43), name->str, calcColWidth(8), calcColWidth(8),
-             package->downloaded, calcColWidth(10) - 3, calcColWidth(10) - 4,
-             package->speed);
-      printf(GREEN);
-      printProgress(package->progress, calcColWidth(39) - 3);
-      printf(WHITE "%3d%%\n", package->progress);
-
-    } else { // For Smaller Terminal Widths
-      printf(GREEN "%-*.*s" WHITE "%*.*s%*.*s/s ", calcColWidth(30),
-             calcColWidth(30) - 2, name->str, calcColWidth(14),
-             calcColWidth(14), package->downloaded, calcColWidth(17) - 3,
-             calcColWidth(17) - 4, package->speed);
-      printf(GREEN);
-      printProgress(package->progress, calcColWidth(39) - 4);
-      printf(WHITE "%3d%%\n", package->progress);
-    }
-  } else {
-    puts("");
+  if (package->packageName == NULL || package->speed == NULL ||
+      package->downloaded == NULL) {
+    printf("\n");
+    return;
   }
+
+  int isBigScreen = getTerminalWidth() >= 110;
+  const int nameIndent = calcColWidth(isBigScreen ? 43 : 30);
+  const int downloadedIndent = calcColWidth(isBigScreen ? 8 : 14);
+  const int speedIndent = calcColWidth(isBigScreen ? 10 : 17) - 3;
+  const int progressIndent = calcColWidth(39) - (isBigScreen ? 3 : 4);
+
+  printf(GREEN "%-*.*s" WHITE "%*.*s%*.*s/s ", nameIndent, nameIndent,
+         name->str, downloadedIndent, downloadedIndent, package->downloaded,
+         speedIndent, speedIndent - 1, package->speed);
+  printf(GREEN);
+  printProgress(package->progress, progressIndent);
+  printf(WHITE "%3d%%\n", package->progress);
 
   if (name)
     freeString(name);
@@ -111,31 +101,27 @@ void printTotalStats(char *totalDownloaded, char *totalSpeed) {
   printProgress(100, 2);
   printf(RED " %s " WHITE, "Stats");
   printf(GREEN);
-  if (getTerminalWidth() >= 110) {
-    printProgress(100, calcColWidth(43) - strlen("Stats") - 2 - 1);
-    printProgress(100, calcColWidth(8) - strlen(totalDownloaded) - 2);
-    printf(RED " %s " GREEN, totalDownloaded);
-    int sep = calcColWidth(9) - strlen(totalSpeed) - 2;
-    printProgress(100, sep);
-    if (sep < 1)
-      printf(RED "%s " WHITE, totalSpeed);
-    else
-      printf(RED " %s " WHITE, totalSpeed);
-    printf(GREEN);
-    printProgress(100, calcColWidth(40));
-  } else {
-    printProgress(100, calcColWidth(30) - strlen("Stats") - 2 - 2);
-    printProgress(100, calcColWidth(14) - strlen(totalDownloaded) - 2);
-    printf(RED " %s " GREEN, totalDownloaded);
-    int sep = calcColWidth(17) - strlen(totalSpeed) - 1;
-    printProgress(100, sep);
-    if (sep < 1)
-      printf(RED "%s " WHITE, totalSpeed);
-    else
-      printf(RED " %s " WHITE, totalSpeed);
-    printf(GREEN);
-    printProgress(100, calcColWidth(39) - 2);
-  }
+
+  int isBigScreen = getTerminalWidth() >= 110;
+  const int nameIndent = calcColWidth(isBigScreen ? 43 : 30) - strlen("Stats") -
+                         (isBigScreen ? 3 : 4); // 2 for the spaces around Stats
+  const int downloadedIndent = calcColWidth(isBigScreen ? 8 : 14) -
+                               strlen(totalDownloaded) - (isBigScreen ? 2 : 1);
+  const int separationIndent = calcColWidth(isBigScreen ? 9 : 17) -
+                               strlen(totalSpeed) - (isBigScreen ? 2 : 3);
+  const int progressIndent =
+      calcColWidth(isBigScreen ? 40 : 39) - (isBigScreen ? 0 : 0);
+
+  printProgress(100, nameIndent);
+  printProgress(100, downloadedIndent);
+  printf(RED " %s " GREEN, totalDownloaded);
+  printProgress(100, separationIndent);
+  if (separationIndent < 1)
+    printf(RED "%s " WHITE, totalSpeed);
+  else
+    printf(RED " %s " WHITE, totalSpeed);
+  printf(GREEN);
+  printProgress(100, progressIndent);
 
   printf("\n");
 }
