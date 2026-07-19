@@ -336,7 +336,7 @@ void movePackages() {
     stringAppend(&moveArguments, packageList.packages[i]->packageName);
     stringAppend(&moveArguments, "* ");
   }
-  stringAppend(&moveArguments, "/var/cache/pacman/pkg/");
+  stringAppend(&moveArguments, "/var/cache/pacman/pkg/ > /dev/null 2>&1");
   mvArgs[2] = moveArguments->str;
 
   execute(mvArgs);
