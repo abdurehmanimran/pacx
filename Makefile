@@ -1,13 +1,13 @@
-FILES := src/pacx.c src/packageinfo.c src/packagelist.c src/downloader.c src/urls.c src/print.c src/progress.c src/str.c src/packageattr.c src/db.c
+FILES := src/pacx.c src/packageinfo.c src/packagelist.c src/downloader.c src/urls.c src/print.c src/progress.c src/str.c src/packageattr.c src/db.c src/utils.c
 
 WARNING_FLAGS := -Wall -Wextra
 DEBUG_FLAGES:= -g -fsanitize=address
 
-build: src/pacx.c src/downloader.c src/urls.c
+build: $(FILES)
 	mkdir -p bin
 	cc $(FILES) -o bin/pacx -pthread $(DEBUG_FLAGES) $(WARNING_FLAGS)
 
-build-release: src/pacx.c src/downloader.c src/urls.c
+build-release: $(FILES)
 	mkdir bin/release -p
 	cc $(FILES) -o bin/release/pacx -O3
 

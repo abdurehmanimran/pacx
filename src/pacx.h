@@ -18,7 +18,4 @@ void syncPackages();
 void updatePackages();
 void syncDBs();
 
-// Util Funcs
-String *chooseUnit(double amount);
-
 #endif // !PACX_H
