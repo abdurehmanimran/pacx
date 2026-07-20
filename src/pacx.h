@@ -8,11 +8,6 @@
 #define VERSION "0.1.6"
 #define PARALLEL_DOWNLOADS 20
 
-typedef struct {
-  char *arg;
-  void (*operation)();
-} Argument;
-
 int isSudo();
 void syncPackages();
 void updatePackages();
