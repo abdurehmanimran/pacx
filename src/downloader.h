@@ -2,6 +2,8 @@
 #define DOWNLOADER_H
 #include "packageinfo.h"
 #include "packagelist.h"
+#include "str.h"
+
 #include <pthread.h>
 
 // Interval after which the download info updates
@@ -11,7 +13,7 @@
 #define DB_DIRECTORY "/var/lib/pacman/sync"
 
 void parseDetails(char *summary, packageInfo *package);
-void downloadPackage(packageInfo *packageInformation);
+void downloadPackage(packageInfo *packageInformation, String *urls);
 void *startDownload(void *arg);
 
 #endif // !DOWNLOADER_H

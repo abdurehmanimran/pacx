@@ -1,7 +1,4 @@
 #include "downloader.h"
-#include "packageinfo.h"
-#include "packagelist.h"
-#include "str.h"
 #include "urls.h"
 
 #include <pthread.h>
@@ -55,16 +52,7 @@ void parseDetails(char *summary, packageInfo *package) {
   changePackageInfo(package, 2, strdup(token));
 }
 
-void downloadPackage(packageInfo *packageInformation) {
-  String *urls = getUrls(repoTable, packageInformation->packageName);
-
-  // Removing the prev db files
-  if (packageInformation->isRepo) {
-    String *fullpath = createString(DB_DIRECTORY "/");
-    stringAppend(&fullpath, packageInformation->packageName);
-    remove(fullpath->str);
-    freeString(fullpath);
-  }
+void downloadPackage(packageInfo *packageInformation, String *urls) {
 
   // getMirrors returns only "file" when the package is already present in
   // pacman's cache
@@ -102,10 +90,9 @@ void downloadPackage(packageInfo *packageInformation) {
 
     execvp(args[0], args);
   } else if (processPID > 0) { // Parent Process
-    // Reading the stdout of the child process
-    close(processPipe[1]); // We dont want to write to the pipe
-
+    close(processPipe[1]);     // We dont want to write to the pipe
     char buffer[128];
+    memset(buffer, 0, sizeof(buffer));
 
     while ((read(processPipe[0], buffer, sizeof(buffer) - 1)) != 0) {
       unsigned int newlinePos =
@@ -116,18 +103,15 @@ void downloadPackage(packageInfo *packageInformation) {
           newlinePos >= sizeof(buffer) ? sizeof(buffer) - 1 : newlinePos;
       buffer[newlinePos] = '\0';
 
-      char info[strlen(buffer) + 1];
-      strncpy(info, buffer, strlen(buffer) + 1);
-      parseDetails(info, packageInformation);
+      parseDetails(buffer, packageInformation);
     }
+    freeString(urls);
 
     kill(processPID, SIGKILL);
     int status;
     waitpid(processPID, &status, 0);
 
     packageInformation->progress = 100;
-
-    freeString(urls);
 
   } else { // Fork error
     printf("Error while downloading the package: %s\n",
@@ -137,7 +121,17 @@ void downloadPackage(packageInfo *packageInformation) {
 
 void *startDownload(void *arg) {
   ((packageInfo *)arg)->downloadStarted = 1;
-  downloadPackage((packageInfo *)arg);
+  String *urls = getUrls(repoTable, ((packageInfo *)arg)->packageName);
+
+  // Removing the prev db files
+  if (((packageInfo *)arg)->isRepo) {
+    String *fullpath = createString(DB_DIRECTORY "/");
+    stringAppend(&fullpath, ((packageInfo *)arg)->packageName);
+    remove(fullpath->str);
+    freeString(fullpath);
+  }
+
+  downloadPackage((packageInfo *)arg, urls);
   ((packageInfo *)arg)->notFinished = 0;
   pthread_exit(NULL);
   return NULL;
