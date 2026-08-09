@@ -18,14 +18,13 @@ void printHelp() {
   printf(GREEN "usage:\t" RED "pacx " WHITE "<operation> [...] <options> \n");
   printf(GREEN "Operations:\n\t" WHITE);
   printf(RED "pacx " WHITE "{"
-             "-S --sync" WHITE "}\n\t");
+             "-S" WHITE "} _____ ____\n\t");
   printf(RED "pacx " WHITE "{-Su}\n\t");
-  printf(RED "pacx " WHITE "{-Syu}\n\t");
+  printf(RED "pacx " WHITE "{-Sy/yu}\n\t");
+  printf(RED "pacx " WHITE "{-R/c/s/cs} _____ ____\n\t");
   printf(RED "pacx " WHITE "{-h --help}\n");
   printf(GREEN "Options:\n\t" WHITE);
-  printf(RED "pacx " WHITE "{-S/u/yu} " RED "--ignore _____ ____\n");
-  printf(GREEN "Note: " WHITE "Do not " RED "terminate " WHITE
-               "pacx while " GREEN "synchronizing databases " WHITE "!!\n");
+  printf(RED "pacx " WHITE "{-S/u/yu} --ignore _____ ____\n");
 }
 
 int getTerminalWidth() {

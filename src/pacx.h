@@ -5,7 +5,7 @@
 #include "packagelist.h"
 #include "str.h"
 
-#define VERSION "0.1.6"
+#define VERSION "0.1.7"
 #define PARALLEL_DOWNLOADS 20
 
 int isSudo();
