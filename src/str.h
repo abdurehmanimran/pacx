@@ -23,6 +23,6 @@ void stringCat(String **dest, String *src);
 void replaceInString(String **str, char *find, char *replace);
 String *getOutput(FILE *stream);
 
-char **strToArray(char *str);
+char **strToArray(const char *str);
 
 #endif // !STR_H

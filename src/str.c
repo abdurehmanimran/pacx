@@ -129,15 +129,16 @@ String *getOutput(FILE *stream) {
   return output;
 }
 
-char **strToArray(char *str) {
+char **strToArray(const char *str) {
+  char *dupStr = strdup(str);
   char **arr = NULL; // Will be allocated after size calculation
-  int end = strlen(str) - 1;
-  while (str[end] == ' ') {
-    str[end] = 0;
+  int end = strlen(dupStr) - 1;
+  while (dupStr[end] == ' ') {
+    dupStr[end] = 0;
     end--;
   }
 
-  char *i = strstr(str, " ");
+  char *i = strstr(dupStr, " ");
   int spaceCount = 0;
 
   while (i) {
@@ -150,7 +151,7 @@ char **strToArray(char *str) {
   arr = malloc(sizeof(char *) * (spaceCount + 2));
 
   char *tok, *tokPtr;
-  tok = strtok_r(str, " ", &tokPtr);
+  tok = strtok_r(dupStr, " ", &tokPtr);
   int index = 0;
 
   while (tok != NULL) {
@@ -159,6 +160,9 @@ char **strToArray(char *str) {
   }
 
   arr[index] = NULL;
+
+  if (dupStr)
+    free(dupStr);
 
   return arr;
 }
