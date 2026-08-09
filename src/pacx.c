@@ -19,10 +19,11 @@
 #include <string.h>
 #include <unistd.h>
 
-Argument args[] = {{"-h", printHelp},        {"--help", printHelp},
-                   {"-S", syncPackages},     {"-s", syncPackages},
-                   {"--sync", syncPackages}, {"-Su", updatePackages},
-                   {"-Sy", syncDBs},         {"-Syu", syncDBs}};
+Argument args[] = {
+    {"-h", printHelp},       {"--help", printHelp},    {"-S", syncPackages},
+    {"-s", syncPackages},    {"--sync", syncPackages}, {"-Su", updatePackages},
+    {"-Sy", syncDBs},        {"-Syu", syncDBs},        {"-R", removePackages},
+    {"-Rc", removePackages}, {"-Rcs", removePackages}, {"-Rs", removePackages}};
 
 char **arguments;
 unsigned int totalArgs;
@@ -261,5 +262,35 @@ void syncDBs() {
   if (strcmp(arguments[currentArg], "-Syu") == 0) {
     puts("");
     updatePackages();
+  }
+}
+
+void removePackages() {
+  if (!isSudo())
+    exit(1);
+
+  String *packages = NULL;
+  String *pacmanCommand = createString("sudo pacman ");
+  // appending -R / -Rc / -Rcs / ...
+  stringAppend(&pacmanCommand, arguments[1]); // same as currentArg
+  stringAppend(&pacmanCommand, " ");
+
+  getArgumentPackages(&packages);
+
+  if (packages) {
+    stringCat(&pacmanCommand, packages);
+    freeString(packages);
+  } else {
+    printf(RED "Error: " WHITE "no package was provided to remove !!\n");
+    exit(1);
+  }
+
+  char **pacmanArgs = strToArray(pacmanCommand->str);
+  printf(GREEN ":: " WHITE "Requesting " GREEN "pacman" WHITE
+               " to kindly remove the package(s) !!\n");
+
+  if (pacmanCommand) {
+    execvp(pacmanArgs[0], pacmanArgs);
+    freeString(pacmanCommand);
   }
 }

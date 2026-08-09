@@ -12,5 +12,6 @@ int isSudo();
 void syncPackages();
 void updatePackages();
 void syncDBs();
+void removePackages();
 
 #endif // !PACX_H
