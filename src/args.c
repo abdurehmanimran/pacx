@@ -10,8 +10,10 @@ void getArgumentPackages(String **buffer) {
   allocString(buffer, 1024);
   index++;
 
-  stringAppend(buffer, arguments[index++]);
-  stringAppend(buffer, " ");
+  if (index >= totalArgs) {
+    freeString(*buffer);
+    *buffer = NULL;
+  }
 
   while (index < totalArgs) {
     if (arguments[index][0] == '-')
@@ -66,6 +68,12 @@ char *getPackageNames(int toUpdate, String **command) {
     *command = createString("pacman -S ");
 
     getArgumentPackages(&argumentPackages);
+
+    if (argumentPackages == NULL) {
+      puts(GREEN "Alert:" WHITE " Nothing to do!!");
+      exit(0);
+    }
+
     stringCat(command, argumentPackages);
     stringAppend(command, " --print-format '%n %s' ");
     if (toIgnore) {
