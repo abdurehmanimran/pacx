@@ -34,10 +34,11 @@ sudo make install-debug
 ## Usage
 | Action | Command |
 | :--- | :--- |
-| Install Package(s) | `sudo pacx -S package ____ ___` |
+| Install Package(s) | `sudo pacx -S ____ ___` |
 | Synchronize Database | `sudo pacx -Sy` |
-| Upgrade System Packages | `sudo pacx -Su` |
+| Upgrade System Package(s) | `sudo pacx -Su` |
 | Sync & Upgrade | `sudo pacx -Syu` |
+| Remove Package(s) | `sudo pacx -R/c/s/cs ____ ___` |
 
 ## See It In Action
 <img width="1908" height="1022" alt="image" src="https://github.com/user-attachments/assets/f473b809-84fd-408e-8533-a37c1ee63450" />
