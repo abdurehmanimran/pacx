@@ -1,4 +1,6 @@
 #include "str.h"
+
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -69,6 +71,7 @@ void stringCat(String **dest, String *src) {
 
 void replaceInString(String **str, char *find, char *replace) {
   unsigned int findlen = strlen(find);
+  assert(findlen != 0);
   unsigned int replacelen = strlen(replace);
   int offset = replacelen - findlen;
 
