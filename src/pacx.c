@@ -21,7 +21,7 @@
 
 Argument args[] = {
     {"-h", printHelp},       {"--help", printHelp},    {"-S", syncPackages},
-    {"-s", syncPackages},    {"--sync", syncPackages}, {"-Su", updatePackages},
+    {"-s", syncPackages},    {"--sync", syncPackages}, {"-Su", syncPackages},
     {"-Sy", syncDBs},        {"-Syu", syncDBs},        {"-R", removePackages},
     {"-Rc", removePackages}, {"-Rcs", removePackages}, {"-Rs", removePackages}};
 
@@ -132,9 +132,9 @@ void fetchPackages(packageInfoList *packageList, int level) {
 
     usleep(5000);
   }
-  SHOW_CURSOR;
 
 cleanup:
+  SHOW_CURSOR;
   freePackageList(packagesDownloading);
   free(packagesDownloading);
   free(threads);
@@ -176,18 +176,25 @@ void createPackageList(packageInfoList *packageList, int toUpdate) {
 }
 
 void syncPackages() {
+  char toUpdate = 0;
   if (!isSudo())
     exit(1);
 
+  if (strcmp(arguments[1], "-Su") == 0 || strcmp(arguments[1], "-Syu") == 0) {
+    puts(GREEN "::" WHITE " Starting " GREEN "full system " WHITE "update!!");
+    toUpdate = 1;
+  }
+
   // Setup the list of packages
-  createPackageList(&packageList, 0);
+  createPackageList(&packageList, toUpdate);
   printDetails(&packageList);
+
   if (!askYesOrNo()) {
     exit(0);
   }
   puts(""); // Add a new line for separation
 
-  if (repoTable == NULL) {
+  if (repoTable == NULL) { // Setup repoTable for once if not already
     packageInfoList dbList;
     initPackageList(&dbList);
     createDBPackageList(&dbList);
@@ -195,44 +202,8 @@ void syncPackages() {
   }
 
   fetchPackages(&packageList, 2);
-
   movePackages();
-  freePackageList(&packageList);
-
-  // Making args array
-  stringAppend(&pacmanCommand, " --color always");
-  replaceInString(&pacmanCommand, "--print-format '%n %s'", " ");
-  replaceInString(&pacmanCommand, "   ", "");
-
-  char **pacmanArgs = strToArray(pacmanCommand->str);
-  freeString(pacmanCommand); // No need for pacmanCommand now
-
-  execvp(pacmanArgs[0], pacmanArgs);
-}
-
-void updatePackages() {
-  if (!isSudo())
-    exit(1);
-  puts(GREEN "::" WHITE " Starting " GREEN "full system " WHITE "update!!");
-  createPackageList(&packageList, 1);
-
-  printDetails(&packageList);
-  if (!askYesOrNo()) {
-    exit(0);
-  }
-  puts("");
-
-  if (repoTable == NULL) {
-    packageInfoList dbList;
-    initPackageList(&dbList);
-    createDBPackageList(&dbList);
-    createMirrorTable(&dbList, &repoTable);
-  }
-
-  fetchPackages(&packageList, 2);
-
-  movePackages();
-  freePackageList(&packageList);
+  freePackageList(&packageList); // All use of packageList has ended
 
   // Making args array
   stringAppend(&pacmanCommand, " --color always");
@@ -261,7 +232,7 @@ void syncDBs() {
 
   if (strcmp(arguments[currentArg], "-Syu") == 0) {
     puts("");
-    updatePackages();
+    syncPackages();
   }
 }
 
