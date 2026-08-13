@@ -4,6 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <sys/wait.h>
 #include <unistd.h>
 
 extern packageInfoList packageList;
@@ -66,9 +67,10 @@ void execute(char **args) {
   pid_t process;
   process = fork();
 
-  if (process == 0) {
+  if (process == 0)
     execvp(args[0], args);
-  }
+  else
+    waitpid(process, NULL, 0);
 }
 
 void movePackages() {
