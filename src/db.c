@@ -1,12 +1,20 @@
 #include "db.h"
+#include "colors.h"
 #include "packageattr.h"
 #include "str.h"
 
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 
 void createDBPackageList(packageInfoList *dbList) {
   FILE *pacmanConf = fopen(PACMAN_CONFIG_PATH, "r");
+
+  if (pacmanConf == NULL) {
+    printf(RED "Error: " WHITE "failed to open pacman.conf file !!\n");
+    exit(1);
+  }
+
   char lineBuff[128];
   memset(lineBuff, 0, sizeof(lineBuff));
 
@@ -15,9 +23,9 @@ void createDBPackageList(packageInfoList *dbList) {
 
     while (lineBuff[0] != '[' || strstr(lineBuff, "options")) {
       memset(lineBuff, 0, sizeof(lineBuff));
-      fgets(lineBuff, sizeof(lineBuff), pacmanConf);
+      char *ptr = fgets(lineBuff, sizeof(lineBuff), pacmanConf);
 
-      if (feof(pacmanConf)) {
+      if (feof(pacmanConf) || ptr == NULL) {
         end = 1;
         break;
       }
