@@ -76,33 +76,29 @@ void replaceInString(String **str, char *find, char *replace) {
   int offset = replacelen - findlen;
 
   for (unsigned int i = 0; i < (*str)->size; i++) {
-    char found = 1;
-
     if (strstr((*str)->str, find) != (*str)->str + i)
-      found = 0;
+      continue; // Not found go to the next char
 
-    if (found) {
-      // Adding 1 to account for the NULL char
-      while (offset + (*str)->size + 1 > (*str)->capacity)
-        expandStringCap(str);
+    // Adding 1 to account for the NULL char
+    while (offset + (*str)->size + 1 > (*str)->capacity)
+      expandStringCap(str);
 
-      // Slide to the right starting from the end
-      if (offset > 0) {
-        for (unsigned int k = (*str)->size - 1; k >= findlen + i; k--)
-          (*str)->str[k + offset] = (*str)->str[k];
-      } else { // Slide to the left starting from the left side
-        for (unsigned int k = findlen + i; k < (*str)->size; k++)
-          (*str)->str[k + offset] = (*str)->str[k];
-      }
+    // Slide to the right starting from the end
+    if (offset > 0) {
+      for (unsigned int k = (*str)->size - 1; k >= findlen + i; k--)
+        (*str)->str[k + offset] = (*str)->str[k];
+    } else { // Slide to the left starting from the left side
+      for (unsigned int k = findlen + i; k < (*str)->size; k++)
+        (*str)->str[k + offset] = (*str)->str[k];
+    }
 
-      // Calculate the new size and place the null character accordingly
-      (*str)->size += offset;
-      (*str)->str[(*str)->size] = '\0';
+    // Calculate the new size and place the null character accordingly
+    (*str)->size += offset;
+    (*str)->str[(*str)->size] = '\0';
 
-      // Replace
-      for (unsigned int k = 0; k < replacelen; k++) {
-        (*str)->str[k + i] = replace[k];
-      }
+    // Replace
+    for (unsigned int k = 0; k < replacelen; k++) {
+      (*str)->str[k + i] = replace[k];
     }
   }
 }
