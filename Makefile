@@ -1,23 +1,28 @@
-SRC_DIR := src/
-FILES := $(wildcard $(SRC_DIR)*.c)
+NAME := pacx
+SRC_DIR := src
+FILES := $(wildcard $(SRC_DIR)/*.c)
 
 WARNING_FLAGS := -Wall -Wextra
 DEBUG_FLAGES:= -g -fsanitize=address
 
-build: $(FILES)
+BUILD_DIR:= bin
+BINARY := ${BUILD_DIR}/${NAME}
+REL_BINARY := ${BUILD_DIR}/release/${NAME}
+
+build ${BINARY}: ${FILES}
 	mkdir -p bin
-	cc $(FILES) -o bin/pacx -pthread $(DEBUG_FLAGES) $(WARNING_FLAGS)
+	cc ${FILES} -o ${BINARY} -pthread ${DEBUG_FLAGES} ${WARNING_FLAGS}
 
-build-release: $(FILES)
+build-release ${REL_BINARY}: ${FILES}
 	mkdir bin/release -p
-	cc $(FILES) -o bin/release/pacx -O3
+	cc ${FILES} -o ${REL_BINARY} -O3
 
-install:
+install: ${REL_BINARY}
 	mkdir /usr/share/pacx/cache -p
 	mkdir /usr/share/pacx/log -p
-	cp bin/release/pacx /usr/bin/pacx
+	cp ${REL_BINARY} /usr/bin/pacx
 
-install-debug:
+install-debug: ${BINARY}
 	mkdir /usr/share/pacx/cache -p
 	mkdir /usr/share/pacx/log -p
-	cp bin/pacx /usr/bin/pacx
+	cp ${BINARY} /usr/bin/pacx
