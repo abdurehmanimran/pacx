@@ -108,10 +108,10 @@ void printTotalStats(char *totalDownloaded, char *totalSpeed) {
                          (isBigScreen ? 3 : 4); // 2 for the spaces around Stats
   const int downloadedIndent = calcColWidth(isBigScreen ? 8 : 14) -
                                strlen(totalDownloaded) - (isBigScreen ? 2 : 1);
-  const int separationIndent = calcColWidth(isBigScreen ? 9 : 17) -
-                               strlen(totalSpeed) - (isBigScreen ? 2 : 3);
+  const int separationIndent = calcColWidth(isBigScreen ? 10 : 17) -
+                               strlen(totalSpeed) - (isBigScreen ? 3 : 3);
   const int progressIndent =
-      calcColWidth(isBigScreen ? 40 : 39) - (isBigScreen ? 0 : 0);
+      calcColWidth(isBigScreen ? 40 : 39) - (isBigScreen ? 1 : 0);
 
   printProgress(100, nameIndent);
   printProgress(100, downloadedIndent);
