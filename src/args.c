@@ -5,6 +5,16 @@
 #include <stdlib.h>
 #include <string.h>
 
+int onlyNeeded() {
+  unsigned int index = currentArg;
+
+  while (index < totalArgs)
+    if (strstr(arguments[index++], "--needed"))
+      return 1;
+
+  return 0;
+}
+
 void getArgumentPackages(String **buffer) {
   unsigned int index = currentArg;
   allocString(buffer, 1024);
@@ -75,6 +85,9 @@ char *getPackageNames(int toUpdate, String **command) {
     }
 
     stringCat(command, argumentPackages);
+    if (onlyNeeded() && !toUpdate)
+      stringAppend(command, " --needed ");
+
     stringAppend(command, " --print-format '%n %s' ");
     if (toIgnore) {
       stringCat(command, toIgnore);

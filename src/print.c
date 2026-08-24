@@ -14,8 +14,8 @@
 
 void printHelp() {
   printf(GREEN "Pacx\t" RED "A Pacman Wrapper\n");
-  printf(GREEN "ver:\t" RED VERSION "\n");
-  printf(GREEN "usage:\t" RED "pacx " WHITE "<operation> [...] <options> \n");
+  printf(GREEN "Ver:\t" RED VERSION "\n");
+  printf(GREEN "Usage:\t" RED "pacx " WHITE "<operation> [...] <options> \n");
   printf(GREEN "Operations:\n\t" WHITE);
   printf(RED "pacx " WHITE "{"
              "-S" WHITE "} _____ ____\n\t");
@@ -24,7 +24,8 @@ void printHelp() {
   printf(RED "pacx " WHITE "{-R/c/s/cs} _____ ____\n\t");
   printf(RED "pacx " WHITE "{-h --help}\n");
   printf(GREEN "Options:\n\t" WHITE);
-  printf(RED "pacx " WHITE "{-S/u/yu} --ignore _____ ____\n");
+  printf(RED "pacx " WHITE "{-S} _____ ____ --needed\n\t");
+  printf(RED "pacx " WHITE "{-S/u/yu} _____ --ignore _____\n");
 }
 
 int getTerminalWidth() {
