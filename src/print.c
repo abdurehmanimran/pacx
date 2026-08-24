@@ -25,6 +25,7 @@ void printHelp() {
   printf(RED "pacx " WHITE "{-h --help}\n");
   printf(GREEN "Options:\n\t" WHITE);
   printf(RED "pacx " WHITE "{-S} _____ ____ --needed\n\t");
+  printf(RED "pacx " WHITE "{-S/u/yu} _____ --noconfirm\n\t");
   printf(RED "pacx " WHITE "{-S/u/yu} _____ --ignore _____\n");
 }
 

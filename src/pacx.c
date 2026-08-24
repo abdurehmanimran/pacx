@@ -189,9 +189,12 @@ void syncPackages() {
   createPackageList(&packageList, toUpdate);
   printDetails(&packageList);
 
-  if (!askYesOrNo()) {
+  if (checkArgument("--noconfirm")) {
+    stringAppend(&pacmanCommand, " --noconfirm ");
+  } else if (!askYesOrNo()) {
     exit(0);
   }
+
   puts(""); // Add a new line for separation
 
   if (repoTable == NULL) { // Setup repoTable for once if not already

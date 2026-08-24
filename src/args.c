@@ -5,11 +5,11 @@
 #include <stdlib.h>
 #include <string.h>
 
-int onlyNeeded() {
+int checkArgument(const char *toFind) {
   unsigned int index = currentArg;
 
   while (index < totalArgs)
-    if (strstr(arguments[index++], "--needed"))
+    if (toFind && strstr(arguments[index++], toFind))
       return 1;
 
   return 0;
@@ -85,7 +85,7 @@ char *getPackageNames(int toUpdate, String **command) {
     }
 
     stringCat(command, argumentPackages);
-    if (onlyNeeded() && !toUpdate)
+    if (checkArgument("--needed") && !toUpdate)
       stringAppend(command, " --needed ");
 
     stringAppend(command, " --print-format '%n %s' ");

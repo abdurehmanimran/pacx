@@ -15,5 +15,6 @@ extern unsigned int currentArg;
 void getArgumentPackages(String **buffer);
 void getPackagesToIgnore(String **buffer);
 char *getPackageNames(int toUpdate, String **command);
+int checkArgument(const char *toFind);
 
 #endif
