@@ -107,7 +107,7 @@ void downloadPackage(packageInfo *packageInformation, String *urls) {
     }
     freeString(urls);
 
-    kill(processPID, SIGKILL);
+    kill(processPID, SIGTERM);
     int status;
     waitpid(processPID, &status, 0);
 
@@ -127,6 +127,9 @@ void *startDownload(void *arg) {
   if (((packageInfo *)arg)->isRepo) {
     String *fullpath = createString(DB_DIRECTORY "/");
     stringAppend(&fullpath, ((packageInfo *)arg)->packageName);
+    remove(fullpath->str);
+    // Old .sig files will cause issues so we also have to remove them
+    stringAppend(&fullpath, ".sig");
     remove(fullpath->str);
     freeString(fullpath);
   }
