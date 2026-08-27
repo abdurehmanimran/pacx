@@ -26,8 +26,10 @@ void getArgumentPackages(String **buffer) {
   }
 
   while (index < totalArgs) {
-    if (arguments[index][0] == '-')
-      break;
+    if (arguments[index][0] == '-') {
+      index++;
+      continue;
+    }
 
     stringAppend(buffer, arguments[index++]);
     stringAppend(buffer, " ");
