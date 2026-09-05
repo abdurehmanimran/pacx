@@ -15,6 +15,7 @@ int checkArgument(const char *toFind) {
   return 0;
 }
 
+// Gets the packages provided in args that are to be installed into given buffer
 void getArgumentPackages(String **buffer) {
   unsigned int index = currentArg;
   allocString(buffer, 1024);
@@ -27,6 +28,9 @@ void getArgumentPackages(String **buffer) {
 
   while (index < totalArgs) {
     if (arguments[index][0] == '-') {
+      if (strstr(arguments[index], "--ignore"))
+        break; // We don't want to include the packages that are to be ignored
+
       index++;
       continue;
     }
@@ -97,6 +101,8 @@ char *getPackageNames(int toUpdate, String **command) {
     }
   }
 
+  stringAppend(command, " 2>&1"); // So we can read it later on
+
   FILE *process;
   if ((process = popen((*command)->str, "r")) == NULL) {
     puts(GREEN "Error:" WHITE " Failed to run pacman!!");
@@ -107,6 +113,13 @@ char *getPackageNames(int toUpdate, String **command) {
     puts(GREEN "Alert:" WHITE " Nothing to do!!");
     exit(0);
   }
+
+  if (strstr(packageNames->str, "error")) {
+    printf(RED "Error: " WHITE "We have encountered some issue !!\n");
+    printf(GREEN "Info: " WHITE "%s\n", strstr(packageNames->str, "error") + 7);
+    exit(1);
+  }
+
   pclose(process);
 
   char *returnStr = strdup(packageNames->str);

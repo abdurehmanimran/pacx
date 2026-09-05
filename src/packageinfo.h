@@ -1,13 +1,15 @@
 #ifndef PACKAGE_INFO_H
 #define PACKAGE_INFO_H
 
+#include <stdatomic.h>
+
 typedef struct {
   char *packageName;
-  char *downloaded;
-  char *speed;
-  int progress;
-  int notFinished;
-  int downloadStarted;
+  _Atomic(char *) downloaded;
+  _Atomic(char *) speed;
+  _Atomic(int) progress;
+  _Atomic(int) notFinished;
+  _Atomic(int) downloadStarted;
   int isRepo;
 } packageInfo;
 

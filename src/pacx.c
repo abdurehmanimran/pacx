@@ -98,7 +98,7 @@ void fetchPackages(packageInfoList *packageList, int level) {
         popPackage(packagesDownloading, packagesDownloading->packages[i]);
         if (index < packageList->n) {
           insertPackage(packagesDownloading, packageList->packages[index++],
-                        0); // Total size if not needed
+                        0); // Total size is not needed here
           pthread_create(
               &threads[i], NULL, startDownload,
               packagesDownloading->packages[packagesDownloading->n - 1]);
