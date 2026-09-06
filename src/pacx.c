@@ -211,6 +211,7 @@ void syncPackages() {
   // Making args array
   stringAppend(&pacmanCommand, " --color always");
   replaceInString(&pacmanCommand, "--print-format '%n %s'", "");
+  replaceInString(&pacmanCommand, "2>&1", "");
 
   char **pacmanArgs = strToArray(pacmanCommand->str);
   freeString(pacmanCommand); // No need for pacmanCommand now
